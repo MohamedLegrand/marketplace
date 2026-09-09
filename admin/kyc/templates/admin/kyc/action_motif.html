@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<p>Vous allez <strong>rejeter</strong> le ou les dossiers KYC suivants :</p>
+
+<ul>
+  {% for dossier in dossiers %}
+    <li>{{ dossier.vendeur }} &mdash; {{ dossier.nom_complet }} (statut actuel : {{ dossier.get_statut_display }})</li>
+  {% endfor %}
+</ul>
+
+<form method="post">
+  {% csrf_token %}
+  {% for id in selection %}
+    <input type="hidden" name="_selected_action" value="{{ id }}">
+  {% endfor %}
+  <input type="hidden" name="action" value="{{ action }}">
+  <input type="hidden" name="confirmer" value="1">
+
+  <p>
+    <label for="id_motif"><strong>Motif du rejet (obligatoire)</strong></label><br>
+    <textarea id="id_motif" name="motif" rows="4" cols="60" required></textarea>
+  </p>
+
+  <p>
+    <input type="submit" value="Confirmer le rejet" class="default">
+    <a href="{% url 'admin:kyc_dossierkyc_changelist' %}" class="button cancel-link">Annuler</a>
+  </p>
+</form>
+{% endblock %}
