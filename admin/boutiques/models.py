@@ -5,6 +5,16 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 
+class BoutiqueQuerySet(models.QuerySet):
+    def visibles(self):
+        """Boutiques approuvees dont le proprietaire a un abonnement actif."""
+        return self.filter(
+            statut=Boutique.Statut.APPROUVEE,
+            proprietaire__abonnements__statut="actif",
+            proprietaire__abonnements__date_fin__gte=timezone.now(),
+        ).distinct()
+
+
 class Boutique(models.Model):
     """Boutique creee par un vendeur et validee par un administrateur.
 
@@ -85,6 +95,8 @@ class Boutique(models.Model):
         "modifiee le", auto_now=True, db_column="date_modification"
     )
 
+    objects = BoutiqueQuerySet.as_manager()
+
     class Meta:
         db_table = "boutique"
         verbose_name = "boutique"
@@ -121,6 +133,26 @@ class Boutique(models.Model):
 
         return abonnement_actif(self.proprietaire) is not None
 
+    def soumettre(self):
+        """Soumission (ou re-soumission) de la boutique par le vendeur."""
+        ancien_statut = self.statut
+        self.statut = self.Statut.EN_ATTENTE
+        self.motif_rejet = ""
+        self.date_soumission = timezone.now()
+        self.date_decision = None
+        self.decide_par = None
+        self.save(update_fields=[
+            "statut", "motif_rejet", "date_soumission", "date_decision",
+            "decide_par", "date_modification",
+        ])
+        JournalModeration.objects.create(
+            boutique=self,
+            administrateur=None,
+            action=JournalModeration.Action.SOUMISSION,
+            ancien_statut=ancien_statut,
+            nouveau_statut=self.statut,
+        )
+
     def appliquer_decision(self, admin_user, nouveau_statut, action, motif=""):
         """Change le statut, horodate la decision et ecrit le journal."""
         ancien_statut = self.statut
@@ -148,6 +180,7 @@ class JournalModeration(models.Model):
     """
 
     class Action(models.TextChoices):
+        SOUMISSION = "soumission", "Soumission"
         VALIDATION = "validation", "Validation"
         REJET = "rejet", "Rejet"
         SUSPENSION = "suspension", "Suspension"
@@ -273,3 +306,49 @@ class RoleBoutique(models.Model):
             autorise, message = peut_creer_role(self.boutique)
             if not autorise:
                 raise ValidationError(message)
+
+
+class ZoneLivraison(models.Model):
+    """Zone de livraison couverte par une boutique et son tarif.
+
+    La logistique est propre a chaque boutique (pas de transporteur central).
+    Table SQL : "zone_livraison".
+    """
+
+    boutique = models.ForeignKey(
+        Boutique,
+        on_delete=models.CASCADE,
+        related_name="zones_livraison",
+        verbose_name="boutique",
+        db_column="boutique_id",
+    )
+    nom = models.CharField("zone", max_length=100, db_column="nom")
+    tarif = models.PositiveIntegerField("tarif de livraison (XAF)", default=0, db_column="tarif")
+    delai_estime = models.CharField(
+        "delai estime",
+        max_length=50,
+        blank=True,
+        help_text="Ex. : 24 a 48 h.",
+        db_column="delai_estime",
+    )
+    actif = models.BooleanField("active", default=True, db_column="actif")
+    date_creation = models.DateTimeField(
+        "creee le", auto_now_add=True, db_column="date_creation"
+    )
+    date_modification = models.DateTimeField(
+        "modifiee le", auto_now=True, db_column="date_modification"
+    )
+
+    class Meta:
+        db_table = "zone_livraison"
+        verbose_name = "zone de livraison"
+        verbose_name_plural = "zones de livraison"
+        ordering = ["boutique", "nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["boutique", "nom"], name="unique_zone_par_boutique"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.nom} ({self.tarif} XAF)"

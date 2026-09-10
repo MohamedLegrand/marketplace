@@ -1,0 +1,56 @@
+{% extends "client/base.html" %}
+{% block titre %}{{ produit.nom }} - {{ boutique.nom }}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'catalogue:boutique' boutique.slug %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; {{ boutique.nom }}</a>
+
+<div class="grid md:grid-cols-2 gap-6 mt-3">
+  <div>
+    <div class="aspect-square bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center text-slate-300">
+      {% if produit.photo_principale %}<img src="{{ produit.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}photo{% endif %}
+    </div>
+    {% if photos|length > 1 %}
+      <div class="flex gap-2 mt-2">
+        {% for ph in photos %}
+          <div class="w-16 h-16 rounded-lg overflow-hidden border border-slate-200"><img src="{{ ph.image.url }}" class="w-full h-full object-cover"></div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h1 class="text-2xl font-bold">{{ produit.nom }}</h1>
+    <p class="text-xl text-indigo-600 font-bold mt-1">{{ produit.prix }} XAF</p>
+    <p class="text-sm text-slate-600 mt-3 whitespace-pre-line">{{ produit.description }}</p>
+
+    {% if produit.stock_total <= 0 %}
+      <p class="mt-4 text-red-600 font-medium">Rupture de stock</p>
+    {% else %}
+      <form method="post" action="{% url 'panier:ajouter' %}" class="champ-form mt-5 space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="produit" value="{{ produit.pk }}">
+        {% if variantes %}
+          <div>
+            <label>Variante</label>
+            <select name="variante" required class="w-full">
+              <option value="">-- choisir --</option>
+              {% for v in variantes %}
+                <option value="{{ v.pk }}"{% if v.stock <= 0 %} disabled{% endif %}>
+                  {{ v.libelle }} - {{ v.prix_effectif }} XAF{% if v.stock <= 0 %} (rupture){% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+        <div>
+          <label>Quantite</label>
+          <input type="number" name="quantite" value="1" min="1" class="w-24">
+        </div>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-6">
+          Ajouter au panier
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

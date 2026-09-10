@@ -1,0 +1,21 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}{% if mode == "creer" %}Nouvelle boutique{% else %}Modifier la boutique{% endif %}{% endblock %}
+
+{% block contenu %}
+<a href="{% if mode == 'modifier' %}{% url 'boutiques_vendeur:detail' boutique.pk %}{% else %}{% url 'boutiques_vendeur:liste' %}{% endif %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Retour</a>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
+  <h1 class="text-xl font-bold mb-6">
+    {% if mode == "creer" %}Creer ma boutique{% else %}Modifier {{ boutique.nom }}{% endif %}
+  </h1>
+
+  <form method="post" enctype="multipart/form-data" class="champ-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
+      {% if mode == "creer" %}Creer en brouillon{% else %}Enregistrer{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}

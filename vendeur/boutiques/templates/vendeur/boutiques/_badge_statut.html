@@ -1,0 +1,10 @@
+{% comment %}Attend `statut` (valeur) et `libelle` (affichage).{% endcomment %}
+<span class="text-xs font-semibold px-2 py-1 rounded-full
+  {% if statut == 'approuvee' %}bg-emerald-100 text-emerald-700
+  {% elif statut == 'en_attente' %}bg-amber-100 text-amber-800
+  {% elif statut == 'rejetee' %}bg-red-100 text-red-700
+  {% elif statut == 'suspendue' %}bg-orange-100 text-orange-700
+  {% elif statut == 'bannie' %}bg-slate-800 text-white
+  {% else %}bg-slate-100 text-slate-600{% endif %}">
+  {{ libelle }}
+</span>

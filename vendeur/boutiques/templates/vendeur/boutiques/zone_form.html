@@ -1,0 +1,16 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Modifier une zone{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Retour a la boutique</a>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
+  <h1 class="text-xl font-bold mb-6">Zone : {{ zone.nom }}</h1>
+  <form method="post" class="champ-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}

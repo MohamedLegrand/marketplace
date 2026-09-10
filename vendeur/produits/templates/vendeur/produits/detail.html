@@ -1,0 +1,96 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}{{ produit.nom }}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'produits_vendeur:liste' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Produits</a>
+
+<div class="flex items-center justify-between mt-3 mb-4">
+  <h1 class="text-2xl font-bold">{{ produit.nom }}</h1>
+  <div class="flex items-center gap-2">
+    <a href="{% url 'produits_vendeur:modifier' boutique.pk produit.pk %}" class="text-sm text-indigo-600 font-medium">Modifier</a>
+    <form method="post" action="{% url 'produits_vendeur:basculer' boutique.pk produit.pk %}" class="inline">{% csrf_token %}
+      <button class="text-sm text-slate-600">{% if produit.actif %}Retirer de la vente{% else %}Mettre en vente{% endif %}</button>
+    </form>
+  </div>
+</div>
+
+{% if produit.masque_par_admin %}
+  <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 mb-4">Ce produit est masque par l'administrateur.</div>
+{% endif %}
+
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-4 text-sm">
+  <div class="grid sm:grid-cols-3 gap-3">
+    <div><span class="text-slate-400">Prix</span><br>{{ produit.prix }} XAF</div>
+    <div><span class="text-slate-400">Stock total</span><br>{{ produit.stock_total }}{% if produit.a_variantes %} <span class="text-xs text-slate-400">(somme des variantes)</span>{% endif %}</div>
+    <div><span class="text-slate-400">Categorie</span><br>{{ produit.categorie|default:"-" }}</div>
+  </div>
+  <p class="mt-3 text-slate-500">{{ produit.description }}</p>
+  <p class="mt-2 text-xs">Disponible a l'achat : <strong>{% if produit.disponible %}oui{% else %}non{% endif %}</strong></p>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">
+  <h2 class="font-bold mb-3">Photos</h2>
+  {% if photos %}
+    <div class="flex flex-wrap gap-3 mb-4">
+      {% for ph in photos %}
+        <div class="w-24">
+          <div class="w-24 h-24 rounded-lg overflow-hidden border {% if ph.principale %}border-indigo-500{% else %}border-slate-200{% endif %}">
+            <img src="{{ ph.image.url }}" class="w-full h-full object-cover">
+          </div>
+          <div class="text-xs mt-1 flex justify-between">
+            {% if not ph.principale %}
+              <form method="post" action="{% url 'produits_vendeur:photo_principale' boutique.pk produit.pk ph.pk %}">{% csrf_token %}<button class="text-indigo-600">Principale</button></form>
+            {% else %}<span class="text-indigo-600">Principale</span>{% endif %}
+            <form method="post" action="{% url 'produits_vendeur:photo_supprimer' boutique.pk produit.pk ph.pk %}">{% csrf_token %}<button class="text-red-600">X</button></form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-slate-500 mb-4">Aucune photo.</p>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" action="{% url 'produits_vendeur:photo_ajouter' boutique.pk produit.pk %}" class="champ-form flex flex-wrap items-end gap-3">
+    {% csrf_token %}
+    <div>{{ photo_form.image }}</div>
+    <label class="flex items-center gap-1 text-sm">{{ photo_form.principale }} principale</label>
+    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-lg py-2 px-4">Ajouter</button>
+  </form>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">
+  <h2 class="font-bold mb-3">Variantes</h2>
+  {% if variantes %}
+    <table class="w-full text-sm mb-4">
+      <thead class="text-slate-400 text-left"><tr><th class="py-1">Libelle</th><th>Prix</th><th>Stock</th><th>Etat</th><th></th></tr></thead>
+      <tbody>
+        {% for v in variantes %}
+          <tr class="border-t border-slate-100">
+            <td class="py-2">{{ v.libelle }}</td>
+            <td>{{ v.prix_effectif }} XAF{% if v.prix is None %} <span class="text-xs text-slate-400">(prix produit)</span>{% endif %}</td>
+            <td>{{ v.stock }}</td>
+            <td>{% if v.actif %}active{% else %}<span class="text-slate-400">inactive</span>{% endif %}</td>
+            <td class="text-right whitespace-nowrap">
+              <a href="{% url 'produits_vendeur:variante_modifier' boutique.pk produit.pk v.pk %}" class="text-indigo-600">Modifier</a>
+              <form method="post" action="{% url 'produits_vendeur:variante_supprimer' boutique.pk produit.pk v.pk %}" class="inline ml-2">{% csrf_token %}<button class="text-red-600">Supprimer</button></form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-sm text-slate-500 mb-4">Aucune variante. Le stock du produit est utilise tel quel.</p>
+  {% endif %}
+  <form method="post" action="{% url 'produits_vendeur:variante_ajouter' boutique.pk produit.pk %}" class="champ-form flex flex-wrap items-end gap-3">
+    {% csrf_token %}
+    <div><label>Libelle</label>{{ variante_form.libelle }}</div>
+    <div><label>Prix (option.)</label>{{ variante_form.prix }}</div>
+    <div><label>Stock</label>{{ variante_form.stock }}</div>
+    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-lg py-2 px-4">Ajouter</button>
+  </form>
+</div>
+
+<form method="post" action="{% url 'produits_vendeur:supprimer' boutique.pk produit.pk %}" onsubmit="return confirm('Supprimer definitivement ce produit ?');">
+  {% csrf_token %}
+  <button class="text-sm text-red-600">Supprimer ce produit</button>
+</form>
+{% endblock %}

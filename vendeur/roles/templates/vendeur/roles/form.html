@@ -1,0 +1,27 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}{% if mode == "ajouter" %}Ajouter un membre{% else %}Modifier un role{% endif %}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Equipe</a>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
+  <h1 class="text-xl font-bold mb-2">
+    {% if mode == "ajouter" %}Ajouter un membre a {{ boutique.nom }}{% else %}Modifier : {{ role.utilisateur.email }}{% endif %}
+  </h1>
+  {% if mode == "ajouter" %}
+    <p class="text-sm text-slate-500 mb-5">
+      Si l'adresse ne correspond a aucun compte, un compte est cree et un mot de passe
+      provisoire s'affiche apres l'ajout (a transmettre au membre).
+    </p>
+  {% endif %}
+
+  <form method="post" class="champ-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
+      {% if mode == "ajouter" %}Ajouter{% else %}Enregistrer{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}

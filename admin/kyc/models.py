@@ -105,6 +105,23 @@ class DossierKYC(models.Model):
     def rejeter(self, admin_user, motif):
         self._appliquer_decision(admin_user, self.Statut.REJETE, JournalKYC.Action.REJET, motif)
 
+    def soumettre(self):
+        """Soumission du dossier par le vendeur (depuis l'espace vendeur)."""
+        ancien = self.statut
+        self.statut = self.Statut.EN_ATTENTE
+        self.motif_rejet = ""
+        self.date_soumission = timezone.now()
+        self.date_decision = None
+        self.decide_par = None
+        self.save()
+        JournalKYC.objects.create(
+            dossier=self,
+            administrateur=None,
+            action=JournalKYC.Action.SOUMISSION,
+            ancien_statut=ancien,
+            nouveau_statut=self.statut,
+        )
+
 
 class JournalKYC(models.Model):
     """Historique des decisions prises sur un dossier KYC.

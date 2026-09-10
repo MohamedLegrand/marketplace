@@ -1,0 +1,29 @@
+{% extends "client/base.html" %}
+{% block titre %}Boutiques - Marketplace{% endblock %}
+
+{% block contenu %}
+<h1 class="text-2xl font-bold mb-4">Les boutiques</h1>
+
+<form method="get" class="mb-6">
+  <input type="search" name="q" value="{{ recherche }}" placeholder="Rechercher une boutique, une ville..."
+         class="w-full sm:w-96 border border-slate-300 rounded-lg px-3 py-2 text-sm">
+</form>
+
+{% if boutiques %}
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for b in boutiques %}
+      <a href="{% url 'catalogue:boutique' b.slug %}" class="bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-400 flex gap-3">
+        <div class="w-14 h-14 rounded-lg bg-slate-100 shrink-0 overflow-hidden flex items-center justify-center text-slate-300 text-xs">
+          {% if b.logo %}<img src="{{ b.logo.url }}" class="w-full h-full object-cover">{% else %}logo{% endif %}
+        </div>
+        <div class="min-w-0">
+          <p class="font-semibold truncate">{{ b.nom }}</p>
+          <p class="text-sm text-slate-500">{{ b.ville }}{% if b.categorie %} &middot; {{ b.categorie }}{% endif %}</p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-slate-500">Aucune boutique pour l'instant.</p>
+{% endif %}
+{% endblock %}

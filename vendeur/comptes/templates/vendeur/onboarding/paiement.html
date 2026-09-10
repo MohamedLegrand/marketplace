@@ -1,0 +1,27 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Paiement du forfait{% endblock %}
+
+{% block contenu %}
+{% include "vendeur/_stepper.html" %}
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+  <h1 class="text-xl font-bold mb-1">Finaliser votre abonnement</h1>
+  <p class="text-sm text-slate-500 mb-4">
+    Forfait selectionne : <strong>{{ abonnement.plan.nom }}</strong> &mdash;
+    {{ abonnement.plan.prix }} XAF / mois.
+  </p>
+
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800 mb-6">
+    Le paiement par Mobile Money / carte via l'agregateur sera disponible avec le module paiement.
+    En attendant, vous pouvez simuler la confirmation pour poursuivre.
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
+      Simuler le paiement confirme
+    </button>
+  </form>
+  <a href="{% url 'comptes_vendeur:forfait' %}" class="block text-center text-sm text-slate-500 mt-3">Changer de forfait</a>
+</div>
+{% endblock %}

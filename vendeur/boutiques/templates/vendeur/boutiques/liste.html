@@ -1,0 +1,42 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Mes boutiques{% endblock %}
+
+{% block contenu %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Mes boutiques</h1>
+  {% if peut_creer %}
+    <a href="{% url 'boutiques_vendeur:creer' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">
+      + Nouvelle boutique
+    </a>
+  {% endif %}
+</div>
+
+{% if not peut_creer %}
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-4">{{ message_quota }}</div>
+{% endif %}
+
+{% if boutiques %}
+  <div class="space-y-3">
+    {% for b in boutiques %}
+      <a href="{% url 'boutiques_vendeur:detail' b.pk %}" class="block bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-400">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold">{{ b.nom }}</p>
+            <p class="text-sm text-slate-500">{{ b.ville }}{% if b.categorie %} &middot; {{ b.categorie }}{% endif %}</p>
+          </div>
+          {% include "vendeur/boutiques/_badge_statut.html" with statut=b.statut libelle=b.get_statut_display %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+    <p class="mb-4">Vous n'avez pas encore de boutique.</p>
+    {% if peut_creer %}
+      <a href="{% url 'boutiques_vendeur:creer' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">
+        Creer ma premiere boutique
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

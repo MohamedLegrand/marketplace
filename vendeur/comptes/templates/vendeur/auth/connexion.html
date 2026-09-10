@@ -1,0 +1,22 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Connexion vendeur{% endblock %}
+
+{% block contenu %}
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+  <h1 class="text-xl font-bold mb-6">Connexion a l'espace vendeur</h1>
+
+  <form method="post" class="champ-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
+      Se connecter
+    </button>
+  </form>
+
+  <p class="text-sm text-slate-500 mt-4">
+    Pas encore de compte ? <a href="{% url 'comptes_vendeur:inscription' %}" class="text-indigo-600 font-medium">Devenir vendeur</a>
+  </p>
+</div>
+{% endblock %}

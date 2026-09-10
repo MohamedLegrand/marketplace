@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Espace vendeur{% endblock %} - Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .champ-form label { display:block; font-size:.875rem; font-weight:600; color:#374151; margin-bottom:.25rem; }
+    .champ-form input, .champ-form select, .champ-form textarea {
+      width:100%; border:1px solid #d1d5db; border-radius:.5rem; padding:.5rem .75rem;
+      font-size:.95rem; background:#fff;
+    }
+    .champ-form input:focus, .champ-form select:focus, .champ-form textarea:focus {
+      outline:2px solid #4f46e5; outline-offset:1px; border-color:#4f46e5;
+    }
+    .champ-form p, .champ-form .helptext { margin:.35rem 0 1rem; }
+    .champ-form .helptext { font-size:.8rem; color:#6b7280; }
+    .champ-form ul.errorlist { color:#b91c1c; font-size:.8rem; list-style:none; padding:0; margin:.25rem 0 .75rem; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="{% url 'comptes_vendeur:tableau_de_bord' %}" class="font-bold text-indigo-600 text-lg">Marketplace <span class="text-slate-400 font-normal">Vendeur</span></a>
+      {% if user.is_authenticated %}
+        <div class="flex items-center gap-4 text-sm">
+          <span class="text-slate-500 hidden sm:inline">{{ user.email }}</span>
+          <a href="{% url 'comptes_vendeur:profil' %}" class="text-slate-600 hover:text-indigo-600">Profil</a>
+          <form method="post" action="{% url 'comptes_vendeur:deconnexion' %}">{% csrf_token %}
+            <button class="text-slate-600 hover:text-red-600">Deconnexion</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-8">
+    {% if messages %}
+      <div class="space-y-2 mb-6">
+        {% for message in messages %}
+          <div class="rounded-lg px-4 py-3 text-sm {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block contenu %}{% endblock %}
+  </main>
+</body>
+</html>

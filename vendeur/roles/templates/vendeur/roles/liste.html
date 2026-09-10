@@ -1,0 +1,59 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Equipe - {{ boutique.nom }}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; {{ boutique.nom }}</a>
+
+<div class="flex items-center justify-between mt-3 mb-5">
+  <h1 class="text-2xl font-bold">Equipe de la boutique</h1>
+  {% if peut_ajouter %}
+    <a href="{% url 'roles_vendeur:ajouter' boutique.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">+ Ajouter un membre</a>
+  {% endif %}
+</div>
+
+{% if not peut_ajouter %}
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-4">{{ message_quota }}</div>
+{% endif %}
+
+{% if roles %}
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-400 text-left">
+        <tr><th class="py-2 px-3">Membre</th><th>Role</th><th>Permissions</th><th>Etat</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for r in roles %}
+          <tr class="border-t border-slate-100">
+            <td class="py-2 px-3">{{ r.utilisateur.email }}</td>
+            <td>{{ r.libelle|default:r.get_type_role_display }}<div class="text-xs text-slate-400">{{ r.get_type_role_display }}</div></td>
+            <td class="text-xs text-slate-500">
+              {% if r.peut_gerer_produits %}Produits &middot; {% endif %}
+              {% if r.peut_gerer_stock %}Stock &middot; {% endif %}
+              {% if r.peut_gerer_commandes %}Commandes &middot; {% endif %}
+              {% if r.peut_voir_statistiques %}Stats{% endif %}
+            </td>
+            <td>
+              {% if r.actif %}<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Actif</span>
+              {% else %}<span class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">Inactif</span>{% endif %}
+            </td>
+            <td class="text-right whitespace-nowrap px-3">
+              <a href="{% url 'roles_vendeur:modifier' boutique.pk r.pk %}" class="text-indigo-600">Modifier</a>
+              <form method="post" action="{% url 'roles_vendeur:basculer' boutique.pk r.pk %}" class="inline ml-2">{% csrf_token %}
+                <button class="text-slate-600">{% if r.actif %}Desactiver{% else %}Activer{% endif %}</button>
+              </form>
+              <form method="post" action="{% url 'roles_vendeur:retirer' boutique.pk r.pk %}" class="inline ml-2"
+                    onsubmit="return confirm('Retirer ce membre de l\'equipe ?');">{% csrf_token %}
+                <button class="text-red-600">Retirer</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
+    Aucun membre pour l'instant.
+  </div>
+{% endif %}
+{% endblock %}

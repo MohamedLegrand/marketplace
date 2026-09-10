@@ -1,0 +1,91 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}{{ boutique.nom }}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:liste' %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Mes boutiques</a>
+
+<div class="flex items-center justify-between mt-3 mb-4">
+  <h1 class="text-2xl font-bold">{{ boutique.nom }}</h1>
+  {% include "vendeur/boutiques/_badge_statut.html" with statut=boutique.statut libelle=boutique.get_statut_display %}
+</div>
+
+<div class="mb-4 flex gap-4">
+  <a href="{% url 'produits_vendeur:liste' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Gerer les produits &rarr;</a>
+  <a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Gerer l'equipe &rarr;</a>
+</div>
+
+{% if boutique.statut == "rejetee" and boutique.motif_rejet %}
+  <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-sm text-red-700">
+    <strong>Dossier refuse.</strong> Motif : {{ boutique.motif_rejet }}<br>
+    Corrigez les informations puis re-soumettez.
+  </div>
+{% elif boutique.statut == "en_attente" %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-sm text-amber-800">
+    Boutique en attente de validation par l'administrateur (soumise le {{ boutique.date_soumission|date:"d/m/Y" }}).
+  </div>
+{% elif boutique.statut == "suspendue" %}
+  <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-sm text-orange-800">
+    Boutique suspendue.{% if boutique.motif_rejet %} Motif : {{ boutique.motif_rejet }}{% endif %}
+  </div>
+{% endif %}
+
+<div class="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-bold">Informations</h2>
+    {% if modifiable %}
+      <a href="{% url 'boutiques_vendeur:modifier' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Modifier</a>
+    {% endif %}
+  </div>
+  <dl class="text-sm grid sm:grid-cols-2 gap-y-2 gap-x-6">
+    <div><dt class="text-slate-400">Categorie</dt><dd>{{ boutique.categorie|default:"-" }}</dd></div>
+    <div><dt class="text-slate-400">Ville</dt><dd>{{ boutique.ville }}</dd></div>
+    <div><dt class="text-slate-400">Telephone</dt><dd>{{ boutique.telephone }}</dd></div>
+    <div><dt class="text-slate-400">E-mail</dt><dd>{{ boutique.email }}</dd></div>
+    <div class="sm:col-span-2"><dt class="text-slate-400">Adresse</dt><dd>{{ boutique.adresse|default:"-" }}</dd></div>
+    <div class="sm:col-span-2"><dt class="text-slate-400">Description</dt><dd>{{ boutique.description }}</dd></div>
+  </dl>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+  <h2 class="font-bold mb-3">Zones de livraison</h2>
+  {% if zones %}
+    <table class="w-full text-sm mb-4">
+      <thead class="text-slate-400 text-left"><tr><th class="py-1">Zone</th><th>Tarif</th><th>Delai</th><th></th></tr></thead>
+      <tbody>
+        {% for z in zones %}
+          <tr class="border-t border-slate-100">
+            <td class="py-2">{{ z.nom }} {% if not z.actif %}<span class="text-xs text-slate-400">(inactive)</span>{% endif %}</td>
+            <td>{{ z.tarif }} XAF</td>
+            <td>{{ z.delai_estime|default:"-" }}</td>
+            <td class="text-right whitespace-nowrap">
+              <a href="{% url 'boutiques_vendeur:zone_modifier' boutique.pk z.pk %}" class="text-indigo-600">Modifier</a>
+              <form method="post" action="{% url 'boutiques_vendeur:zone_supprimer' boutique.pk z.pk %}" class="inline ml-2">
+                {% csrf_token %}<button class="text-red-600">Supprimer</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-sm text-slate-500 mb-4">Aucune zone definie. Ajoutez au moins une zone couverte.</p>
+  {% endif %}
+
+  <form method="post" action="{% url 'boutiques_vendeur:zone_creer' boutique.pk %}" class="champ-form flex flex-wrap items-end gap-3">
+    {% csrf_token %}
+    <div><label>Zone</label>{{ zone_form.nom }}</div>
+    <div><label>Tarif (XAF)</label>{{ zone_form.tarif }}</div>
+    <div><label>Delai</label>{{ zone_form.delai_estime }}</div>
+    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-lg py-2 px-4">Ajouter</button>
+  </form>
+</div>
+
+{% if soumettable %}
+  <form method="post" action="{% url 'boutiques_vendeur:soumettre' boutique.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg py-2.5">
+      Soumettre a validation
+    </button>
+  </form>
+{% endif %}
+{% endblock %}

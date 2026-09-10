@@ -1,0 +1,40 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Tableau de bord{% endblock %}
+
+{% block contenu %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Bonjour {{ user.first_name|default:user.email }}</h1>
+  <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">Identite validee</span>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-slate-200 p-5">
+    <p class="text-xs uppercase text-slate-400 font-semibold">Forfait</p>
+    <p class="text-lg font-bold mt-1">{{ abonnement.plan.nom }}</p>
+    <p class="text-sm text-slate-500">{{ abonnement.plan.prix }} XAF / mois</p>
+    <p class="text-sm text-slate-500 mt-2">
+      Echeance : {{ abonnement.date_fin|date:"d/m/Y" }}
+      <span class="text-slate-400">({{ abonnement.jours_restants }} j restants)</span>
+    </p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-5">
+    <p class="text-xs uppercase text-slate-400 font-semibold">Boutiques</p>
+    {% if boutiques %}
+      <ul class="text-sm mt-1 space-y-1">
+        {% for b in boutiques %}
+          <li class="flex items-center justify-between">
+            <a href="{% url 'boutiques_vendeur:detail' b.pk %}" class="text-indigo-600 hover:underline">{{ b.nom }}</a>
+            <span class="text-xs text-slate-400">{{ b.get_statut_display }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'boutiques_vendeur:liste' %}" class="inline-block mt-3 text-sm text-indigo-600 font-medium">Gerer mes boutiques &rarr;</a>
+    {% else %}
+      <p class="text-sm text-slate-500 mt-1">Vous n'avez pas encore de boutique.</p>
+      <a href="{% url 'boutiques_vendeur:creer' %}" class="inline-block mt-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">
+        Creer ma boutique
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

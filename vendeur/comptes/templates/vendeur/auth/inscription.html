@@ -1,0 +1,22 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Devenir vendeur{% endblock %}
+
+{% block contenu %}
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+  <h1 class="text-xl font-bold mb-1">Creer un compte vendeur</h1>
+  <p class="text-sm text-slate-500 mb-6">Vendez vos produits sur la marketplace.</p>
+
+  <form method="post" class="champ-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
+      Creer mon compte
+    </button>
+  </form>
+
+  <p class="text-sm text-slate-500 mt-4">
+    Deja inscrit ? <a href="{% url 'comptes_vendeur:connexion' %}" class="text-indigo-600 font-medium">Se connecter</a>
+  </p>
+</div>
+{% endblock %}

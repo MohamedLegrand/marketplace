@@ -1,0 +1,47 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Verification d'identite{% endblock %}
+
+{% block contenu %}
+{% include "vendeur/_stepper.html" %}
+
+{% if phase == "en_attente" %}
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
+    <div class="mx-auto w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mb-3">&#8987;</div>
+    <h1 class="text-xl font-bold mb-2">Dossier en cours de verification</h1>
+    <p class="text-sm text-slate-500 mb-4">
+      Nous avons bien recu vos pieces le {{ dossier.date_soumission|date:"d/m/Y a H:i" }}.
+      La verification prend generalement moins de 48 heures.
+    </p>
+    <p class="text-sm text-slate-500">Vous pourrez choisir votre forfait des que votre identite sera validee.</p>
+  </div>
+
+{% else %}
+  {% if phase == "rejete" %}
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
+      <h2 class="font-semibold text-red-800">Dossier refuse</h2>
+      <p class="text-sm text-red-700 mt-1">Motif : {{ dossier.motif_rejet }}</p>
+      <p class="text-sm text-red-700 mt-1">Corrigez les informations ci-dessous puis renvoyez votre dossier.</p>
+    </div>
+  {% endif %}
+
+  <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-5 text-sm text-indigo-900">
+    <p class="font-semibold mb-1">Pourquoi cette etape ?</p>
+    <p>La verification d'identite (KYC) securise la marketplace et est obligatoire avant de vendre.
+       Preparez une piece d'identite officielle et, si vous vendez au nom d'une entreprise, votre RCCM.</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <h1 class="text-xl font-bold mb-1">Votre dossier vendeur</h1>
+    <p class="text-sm text-slate-500 mb-6">Les documents doivent etre nets et lisibles.</p>
+
+    <form method="post" enctype="multipart/form-data" class="champ-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {{ form.as_p }}
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
+        Envoyer mon dossier
+      </button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

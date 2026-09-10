@@ -1,0 +1,5 @@
+{% comment %}Fil d'etapes. Attend `etape` (profil|identite|forfait|paiement|termine).{% endcomment %}
+{% if etape == "profil" or etape == "identite" %}{% with j=1 %}{% include "vendeur/_stepper_rendu.html" %}{% endwith %}
+{% elif etape == "forfait" or etape == "paiement" %}{% with j=2 %}{% include "vendeur/_stepper_rendu.html" %}{% endwith %}
+{% else %}{% with j=3 %}{% include "vendeur/_stepper_rendu.html" %}{% endwith %}
+{% endif %}

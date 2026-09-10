@@ -3,7 +3,12 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.shortcuts import render
 from django.utils import timezone
 
-from admin.boutiques.models import Boutique, JournalModeration, RoleBoutique
+from admin.boutiques.models import (
+    Boutique,
+    JournalModeration,
+    RoleBoutique,
+    ZoneLivraison,
+)
 
 
 class JournalModerationInline(admin.TabularInline):
@@ -24,6 +29,12 @@ class RoleBoutiqueInline(admin.TabularInline):
     autocomplete_fields = ("utilisateur",)
 
 
+class ZoneLivraisonInline(admin.TabularInline):
+    model = ZoneLivraison
+    extra = 0
+    fields = ("nom", "tarif", "delai_estime", "actif")
+
+
 @admin.register(Boutique)
 class BoutiqueAdmin(admin.ModelAdmin):
     list_display = ("nom", "proprietaire", "categorie", "ville", "statut", "date_soumission")
@@ -31,7 +42,7 @@ class BoutiqueAdmin(admin.ModelAdmin):
     search_fields = ("nom", "proprietaire__email", "email", "telephone")
     date_hierarchy = "date_creation"
     ordering = ("-date_creation",)
-    inlines = (RoleBoutiqueInline, JournalModerationInline)
+    inlines = (ZoneLivraisonInline, RoleBoutiqueInline, JournalModerationInline)
     actions = ("valider", "reactiver", "rejeter", "suspendre", "bannir")
 
     readonly_fields = (

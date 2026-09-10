@@ -47,7 +47,25 @@ INSTALLED_APPS = [
     'admin.boutiques',
     'admin.abonnements',
     'admin.kyc',
+
+    # Espace vendeur (repertoire "vendeur/")
+    'vendeur.comptes',
+    'vendeur.boutiques',
+    'vendeur.roles',
+
+    # Catalogue produits
+    'admin.produits',
+    'vendeur.produits',
+
+    # Espace client / acheteur (repertoire "client/")
+    'client.catalogue',
+    'client.panier',
 ]
+
+# Authentification de l'espace vendeur
+LOGIN_URL = 'comptes_vendeur:connexion'
+LOGIN_REDIRECT_URL = 'comptes_vendeur:tableau_de_bord'
+LOGOUT_REDIRECT_URL = 'comptes_vendeur:connexion'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,6 +89,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'client.panier.context.panier',
             ],
         },
     },
