@@ -1,21 +1,22 @@
 {% extends "vendeur/base.html" %}
 {% block titre %}Mon profil{% endblock %}
+{% block entete %}Mon profil{% endblock %}
 
 {% block contenu %}
-{% if etape != "termine" %}{% include "vendeur/_stepper.html" %}{% endif %}
+{% if etape and etape != "termine" %}{% include "vendeur/_stepper.html" %}{% endif %}
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-  <h1 class="text-xl font-bold mb-1">Vos informations</h1>
-  <p class="text-sm text-slate-500 mb-6">Ces informations nous permettent de vous identifier et de vous contacter.</p>
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-lg">
+  <h2 class="font-semibold text-ink mb-1">Vos informations</h2>
+  <p class="text-sm text-muted mb-5">Elles nous permettent de vous identifier et de vous contacter.</p>
 
-  <form method="post" class="champ-form">
+  <form method="post" class="form-v">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
-      Enregistrer
-    </button>
-    <a href="{% url 'comptes_vendeur:mot_de_passe' %}" class="ml-3 text-sm text-slate-500 hover:text-indigo-600">Changer mon mot de passe</a>
+    <div class="flex items-center gap-4 pt-1">
+      <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">Enregistrer</button>
+      <a href="{% url 'comptes_vendeur:mot_de_passe' %}" class="text-sm text-muted hover:text-fg">Changer mon mot de passe</a>
+    </div>
   </form>
 </div>
 {% endblock %}

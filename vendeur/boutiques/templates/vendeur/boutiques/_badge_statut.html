@@ -1,10 +1,10 @@
 {% comment %}Attend `statut` (valeur) et `libelle` (affichage).{% endcomment %}
-<span class="text-xs font-semibold px-2 py-1 rounded-full
-  {% if statut == 'approuvee' %}bg-emerald-100 text-emerald-700
-  {% elif statut == 'en_attente' %}bg-amber-100 text-amber-800
-  {% elif statut == 'rejetee' %}bg-red-100 text-red-700
-  {% elif statut == 'suspendue' %}bg-orange-100 text-orange-700
-  {% elif statut == 'bannie' %}bg-slate-800 text-white
-  {% else %}bg-slate-100 text-slate-600{% endif %}">
+<span class="text-xs font-medium px-2 py-1 rounded-full border
+  {% if statut == 'approuvee' %}border-emerald-200 bg-emerald-50 text-emerald-700
+  {% elif statut == 'en_attente' %}border-amber-200 bg-amber-50 text-amber-700
+  {% elif statut == 'rejetee' %}border-red-200 bg-red-50 text-red-600
+  {% elif statut == 'suspendue' %}border-orange-200 bg-orange-50 text-orange-700
+  {% elif statut == 'bannie' %}border-line bg-slate-100 text-ink
+  {% else %}border-line bg-soft text-muted{% endif %}">
   {{ libelle }}
 </span>

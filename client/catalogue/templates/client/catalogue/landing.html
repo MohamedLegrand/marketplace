@@ -1,0 +1,140 @@
+{% extends "client/base.html" %}
+{% block titre %}Marketplace — vendez et achetez en ligne au Cameroun{% endblock %}
+{% block main_wrap %}{% endblock %}
+
+{% block contenu %}
+{# ---------- Hero ---------- #}
+<section class="border-b border-line bg-gradient-to-b from-[#eef3fc] to-white">
+  <div class="max-w-5xl mx-auto px-4 py-20 text-center">
+    <p class="inline-flex items-center gap-2 text-xs uppercase tracking-[.16em] text-brand border border-brand/30 bg-brand/10 rounded-full px-3 py-1">
+      <svg class="ico"><use href="#i-store"/></svg> Marché camerounais
+    </p>
+    <h1 class="text-3xl sm:text-5xl font-bold text-ink mt-5 leading-tight">
+      Vendez et achetez en ligne,<br class="hidden sm:block"> partout au Cameroun.
+    </h1>
+    <p class="text-muted mt-4 max-w-xl mx-auto">
+      Une place de marché où chaque commerçant ouvre sa boutique en quelques minutes,
+      et où les acheteurs paient en toute sécurité par Mobile Money.
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+      <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-3 px-6">
+        <svg class="ico"><use href="#i-search"/></svg> Parcourir les boutiques
+      </a>
+      <a href="{% url 'comptes_vendeur:inscription' %}" class="inline-flex items-center gap-2 border border-line hover:border-brand/60 text-fg font-semibold rounded-lg py-3 px-6">
+        <svg class="ico"><use href="#i-store"/></svg> Devenir vendeur
+      </a>
+    </div>
+    {% if nb_boutiques %}
+      <p class="text-xs text-muted mt-6">{{ nb_boutiques }} boutique{{ nb_boutiques|pluralize }} déjà en ligne</p>
+    {% endif %}
+  </div>
+</section>
+
+{# ---------- Acheter en 3 étapes ---------- #}
+<section id="comment" class="max-w-5xl mx-auto px-4 py-16">
+  <h2 class="text-xl font-semibold text-ink text-center">Acheter, c'est simple</h2>
+  <div class="grid sm:grid-cols-3 gap-4 mt-8">
+    {% for ico, titre, texte in etapes_achat %}
+      <div class="bg-surface border border-line rounded-xl p-6">
+        <div class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
+          <svg class="ico" style="width:18px;height:18px"><use href="#{{ ico }}"/></svg>
+        </div>
+        <p class="font-semibold text-ink mt-3">{{ titre }}</p>
+        <p class="text-sm text-muted mt-1">{{ texte }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# ---------- Pour les vendeurs ---------- #}
+<section id="vendeurs" class="border-y border-line bg-soft">
+  <div class="max-w-5xl mx-auto px-4 py-16 grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <h2 class="text-xl font-semibold text-ink">Ouvrez votre boutique</h2>
+      <p class="text-muted mt-2 text-sm">
+        Inscrivez-vous, faites vérifier votre identité, choisissez un forfait mensuel
+        et commencez à vendre. Vous gérez vos produits, vos commandes et votre équipe
+        depuis un tableau de bord dédié.
+      </p>
+      <ul class="mt-5 space-y-2 text-sm text-fg">
+        <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-check"/></svg> Boutique en ligne sans compétence technique</li>
+        <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-check"/></svg> Paiements Mobile Money &amp; carte via un agrégateur</li>
+        <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-check"/></svg> Livraison gérée par vos soins, zone par zone</li>
+      </ul>
+      <a href="{% url 'comptes_vendeur:inscription' %}" class="inline-flex items-center gap-2 mt-6 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+        Créer ma boutique <svg class="ico"><use href="#i-arrow"/></svg>
+      </a>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      {% for ico, titre in atouts_vendeur %}
+        <div class="bg-surface border border-line rounded-xl p-4">
+          <svg class="ico text-brand" style="width:18px;height:18px"><use href="#{{ ico }}"/></svg>
+          <p class="text-sm text-ink font-medium mt-2">{{ titre }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ---------- A propos (teaser) ---------- #}
+<section class="border-y border-line">
+  <div class="max-w-3xl mx-auto px-4 py-16 text-center">
+    <h2 class="text-xl font-semibold text-ink">À propos</h2>
+    <p class="text-muted mt-3">
+      Marketplace est une place de marché en ligne dédiée au Cameroun : ouvrir une boutique
+      en quelques minutes, vendre partout dans le pays, payer par Mobile Money en toute
+      sécurité. Vérification des vendeurs, avis modérés, livraison locale.
+    </p>
+    <a href="{% url 'catalogue:apropos' %}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium mt-4">
+      En savoir plus sur la marketplace <svg class="ico"><use href="#i-arrow"/></svg>
+    </a>
+  </div>
+</section>
+
+{# ---------- Acces rapide ---------- #}
+<section id="acces" class="max-w-5xl mx-auto px-4 py-16">
+  <h2 class="text-xl font-semibold text-ink text-center">Rejoindre la marketplace</h2>
+  <div class="grid sm:grid-cols-3 gap-4 mt-8">
+    <a href="{% url 'catalogue:connexion' %}" class="bg-surface border border-line rounded-xl p-6 hover:border-brand/50">
+      <span class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center"><svg class="ico"><use href="#i-login"/></svg></span>
+      <p class="font-semibold text-ink mt-3">Se connecter</p>
+      <p class="text-sm text-muted mt-1">E-mail et mot de passe. Redirection automatique vers votre espace.</p>
+    </a>
+    <a href="{% url 'comptes_client:inscription' %}" class="bg-surface border border-line rounded-xl p-6 hover:border-brand/50">
+      <span class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center"><svg class="ico"><use href="#i-user"/></svg></span>
+      <p class="font-semibold text-ink mt-3">Créer un compte acheteur</p>
+      <p class="text-sm text-muted mt-1">Gratuit. Parcourez, commandez et payez par Mobile Money.</p>
+    </a>
+    <a href="{% url 'comptes_vendeur:inscription' %}" class="bg-surface border border-line rounded-xl p-6 hover:border-brand/50">
+      <span class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center"><svg class="ico"><use href="#i-store"/></svg></span>
+      <p class="font-semibold text-ink mt-3">Devenir vendeur</p>
+      <p class="text-sm text-muted mt-1">Ouvrez votre boutique en ligne, sur abonnement mensuel.</p>
+    </a>
+  </div>
+</section>
+
+{# ---------- Apercu boutiques ---------- #}
+{% if boutiques %}
+<section class="border-t border-line">
+  <div class="max-w-5xl mx-auto px-4 py-16">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-ink">Quelques boutiques</h2>
+      <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium">Toutes les boutiques <svg class="ico"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for b in boutiques %}
+        <a href="{% url 'catalogue:boutique' b.slug %}" class="bg-surface border border-line rounded-xl p-4 hover:border-brand/50 flex gap-3">
+          <div class="w-14 h-14 rounded-lg bg-slate-100 border border-line shrink-0 overflow-hidden flex items-center justify-center text-muted">
+            {% if b.logo %}<img src="{{ b.logo.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-store"/></svg>{% endif %}
+          </div>
+          <div class="min-w-0">
+            <p class="font-medium text-ink truncate">{{ b.nom }}</p>
+            <p class="text-sm text-muted">{{ b.ville }}{% if b.categorie %} · {{ b.categorie }}{% endif %}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

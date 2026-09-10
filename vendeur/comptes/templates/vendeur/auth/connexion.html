@@ -1,22 +1,39 @@
-{% extends "vendeur/base.html" %}
-{% block titre %}Connexion vendeur{% endblock %}
+{% extends "client/base.html" %}
+{% block titre %}Connexion vendeur · Marketplace{% endblock %}
 
 {% block contenu %}
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-  <h1 class="text-xl font-bold mb-6">Connexion a l'espace vendeur</h1>
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-1">Connexion</h1>
+  <p class="text-sm text-muted mb-6">Accédez à votre espace vendeur.</p>
 
-  <form method="post" class="champ-form">
+  <form method="post" class="form-c space-y-4">
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {{ form.as_p }}
+    <div>
+      <label>{{ form.username.label }}</label>
+      <div class="field with-ico">
+        <svg class="field-ico"><use href="#i-mail"/></svg>
+        {{ form.username }}
+      </div>
+      {{ form.username.errors }}
+    </div>
+    <div>
+      <label>Mot de passe</label>
+      <div class="field with-ico pw-field">
+        <svg class="field-ico"><use href="#i-lock"/></svg>
+        {{ form.password }}
+      </div>
+      {{ form.password.errors }}
+    </div>
     <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">
       Se connecter
     </button>
   </form>
 
-  <p class="text-sm text-slate-500 mt-4">
-    Pas encore de compte ? <a href="{% url 'comptes_vendeur:inscription' %}" class="text-indigo-600 font-medium">Devenir vendeur</a>
+  <p class="text-sm text-muted mt-5">
+    Pas encore de compte ?
+    <a href="{% url 'comptes_vendeur:inscription' %}" class="text-brand font-medium">Créer un compte vendeur</a>
   </p>
 </div>
 {% endblock %}

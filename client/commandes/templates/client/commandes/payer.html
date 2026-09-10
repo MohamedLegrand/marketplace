@@ -1,0 +1,29 @@
+{% extends "client/base.html" %}
+{% block titre %}Payer · {{ commande.reference }}{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-1 flex items-center gap-2"><svg class="ico text-brand"><use href="#i-card"/></svg> Paiement Mobile Money</h1>
+  <p class="text-sm text-muted">Commande {{ commande.reference }}</p>
+  <p class="text-lg font-bold text-ink mt-1 mb-5">{{ commande.total }} XAF</p>
+
+  <form method="post" class="form-c space-y-3">
+    {% csrf_token %}
+    <div>
+      <label>Opérateur</label>
+      <select name="operateur" required>
+        {% for val, lib in operateurs %}<option value="{{ val }}">{{ lib }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Numéro (format 2376XXXXXXXX)</label>
+      <div class="field with-ico">
+        <svg class="field-ico"><use href="#i-phone"/></svg>
+        <input type="text" name="telephone" value="{{ request.user.telephone|default:'' }}" placeholder="2376XXXXXXXX" required>
+      </div>
+    </div>
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Payer {{ commande.total }} XAF</button>
+  </form>
+  <p class="text-xs text-muted mt-3">Vous recevrez une demande de validation sur votre téléphone.</p>
+</div>
+{% endblock %}

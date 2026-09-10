@@ -13,9 +13,14 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("vendeur/boutiques/<int:boutique_pk>/equipe/", include("vendeur.roles.urls")),
     path("vendeur/boutiques/<int:boutique_pk>/produits/", include("vendeur.produits.urls")),
+    path("vendeur/boutiques/<int:boutique_pk>/commandes/", include("vendeur.commandes.urls")),
     path("vendeur/boutiques/", include("vendeur.boutiques.urls")),
     path("vendeur/", include("vendeur.comptes.urls")),
+    path("compte/avis/", include("client.avis.urls")),
+    path("compte/", include("client.comptes.urls")),
+    path("commande/", include("client.commandes.urls")),
     path("panier/", include("client.panier.urls")),
+    path("contact/", include("client.contact.urls")),
     path("", include("client.catalogue.urls")),
 ]
 

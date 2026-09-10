@@ -1,90 +1,99 @@
 {% extends "vendeur/base.html" %}
 {% block titre %}{{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }}{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'boutiques_vendeur:liste' %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Mes boutiques</a>
+<a href="{% url 'boutiques_vendeur:liste' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> Mes boutiques
+</a>
 
 <div class="flex items-center justify-between mt-3 mb-4">
-  <h1 class="text-2xl font-bold">{{ boutique.nom }}</h1>
+  <h2 class="text-xl font-semibold text-ink">{{ boutique.nom }}</h2>
   {% include "vendeur/boutiques/_badge_statut.html" with statut=boutique.statut libelle=boutique.get_statut_display %}
 </div>
 
-<div class="mb-4 flex gap-4">
-  <a href="{% url 'produits_vendeur:liste' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Gerer les produits &rarr;</a>
-  <a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Gerer l'equipe &rarr;</a>
+<div class="flex flex-wrap gap-1 border-b border-line mb-5 text-sm">
+  <a href="{% url 'produits_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-package"/></svg> Produits</a>
+  <a href="{% url 'commandes_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-bag"/></svg> Commandes</a>
+  <a href="{% url 'boutiques_vendeur:avis' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-star"/></svg> Avis</a>
+  <a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-users"/></svg> Équipe</a>
 </div>
 
 {% if boutique.statut == "rejetee" and boutique.motif_rejet %}
-  <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-sm text-red-700">
-    <strong>Dossier refuse.</strong> Motif : {{ boutique.motif_rejet }}<br>
-    Corrigez les informations puis re-soumettez.
+  <div class="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 mb-4 text-sm">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-alert"/></svg>
+    <div><span class="font-semibold">Dossier refusé.</span> Motif : {{ boutique.motif_rejet }}<br>Corrigez les informations puis re-soumettez.</div>
   </div>
 {% elif boutique.statut == "en_attente" %}
-  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-sm text-amber-800">
-    Boutique en attente de validation par l'administrateur (soumise le {{ boutique.date_soumission|date:"d/m/Y" }}).
+  <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 mb-4 text-sm">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-clock"/></svg>
+    <div>En attente de validation par l'administrateur (soumise le {{ boutique.date_soumission|date:"d/m/Y" }}).</div>
   </div>
 {% elif boutique.statut == "suspendue" %}
-  <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-sm text-orange-800">
-    Boutique suspendue.{% if boutique.motif_rejet %} Motif : {{ boutique.motif_rejet }}{% endif %}
+  <div class="flex items-start gap-2.5 rounded-lg border border-orange-200 bg-orange-50 text-orange-800 px-4 py-3 mb-4 text-sm">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-alert"/></svg>
+    <div>Boutique suspendue.{% if boutique.motif_rejet %} Motif : {{ boutique.motif_rejet }}{% endif %}</div>
   </div>
 {% endif %}
 
-<div class="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+<div class="bg-surface border border-line rounded-xl p-6 mb-4">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="font-bold">Informations</h2>
+    <h3 class="font-semibold text-ink">Informations</h3>
     {% if modifiable %}
-      <a href="{% url 'boutiques_vendeur:modifier' boutique.pk %}" class="text-sm text-indigo-600 font-medium">Modifier</a>
+      <a href="{% url 'boutiques_vendeur:modifier' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium"><svg class="ico"><use href="#i-edit"/></svg> Modifier</a>
     {% endif %}
   </div>
-  <dl class="text-sm grid sm:grid-cols-2 gap-y-2 gap-x-6">
-    <div><dt class="text-slate-400">Categorie</dt><dd>{{ boutique.categorie|default:"-" }}</dd></div>
-    <div><dt class="text-slate-400">Ville</dt><dd>{{ boutique.ville }}</dd></div>
-    <div><dt class="text-slate-400">Telephone</dt><dd>{{ boutique.telephone }}</dd></div>
-    <div><dt class="text-slate-400">E-mail</dt><dd>{{ boutique.email }}</dd></div>
-    <div class="sm:col-span-2"><dt class="text-slate-400">Adresse</dt><dd>{{ boutique.adresse|default:"-" }}</dd></div>
-    <div class="sm:col-span-2"><dt class="text-slate-400">Description</dt><dd>{{ boutique.description }}</dd></div>
+  <dl class="text-sm grid sm:grid-cols-2 gap-y-2.5 gap-x-6">
+    <div><dt class="text-muted">Catégorie</dt><dd class="text-fg">{{ boutique.categorie|default:"—" }}</dd></div>
+    <div><dt class="text-muted">Ville</dt><dd class="text-fg">{{ boutique.ville }}</dd></div>
+    <div><dt class="text-muted">Téléphone</dt><dd class="text-fg">{{ boutique.telephone }}</dd></div>
+    <div><dt class="text-muted">E-mail</dt><dd class="text-fg">{{ boutique.email }}</dd></div>
+    <div class="sm:col-span-2"><dt class="text-muted">Adresse</dt><dd class="text-fg">{{ boutique.adresse|default:"—" }}</dd></div>
+    <div class="sm:col-span-2"><dt class="text-muted">Description</dt><dd class="text-fg">{{ boutique.description }}</dd></div>
   </dl>
 </div>
 
-<div class="bg-white rounded-xl border border-slate-200 p-6 mb-4">
-  <h2 class="font-bold mb-3">Zones de livraison</h2>
+<div class="bg-surface border border-line rounded-xl p-6 mb-4">
+  <h3 class="font-semibold text-ink mb-3 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-truck"/></svg> Zones de livraison</h3>
   {% if zones %}
-    <table class="w-full text-sm mb-4">
-      <thead class="text-slate-400 text-left"><tr><th class="py-1">Zone</th><th>Tarif</th><th>Delai</th><th></th></tr></thead>
+    <div class="overflow-x-auto"><table class="w-full min-w-[520px] text-sm mb-4">
+      <thead class="text-muted text-left"><tr><th class="py-1 font-medium">Zone</th><th class="font-medium">Tarif</th><th class="font-medium">Délai</th><th></th></tr></thead>
       <tbody>
         {% for z in zones %}
-          <tr class="border-t border-slate-100">
-            <td class="py-2">{{ z.nom }} {% if not z.actif %}<span class="text-xs text-slate-400">(inactive)</span>{% endif %}</td>
-            <td>{{ z.tarif }} XAF</td>
-            <td>{{ z.delai_estime|default:"-" }}</td>
+          <tr class="border-t border-line">
+            <td class="py-2 text-fg">{{ z.nom }} {% if not z.actif %}<span class="text-xs text-muted">(inactive)</span>{% endif %}</td>
+            <td class="text-fg">{{ z.tarif }} XAF</td>
+            <td class="text-fg">{{ z.delai_estime|default:"—" }}</td>
             <td class="text-right whitespace-nowrap">
-              <a href="{% url 'boutiques_vendeur:zone_modifier' boutique.pk z.pk %}" class="text-indigo-600">Modifier</a>
-              <form method="post" action="{% url 'boutiques_vendeur:zone_supprimer' boutique.pk z.pk %}" class="inline ml-2">
-                {% csrf_token %}<button class="text-red-600">Supprimer</button>
+              <a href="{% url 'boutiques_vendeur:zone_modifier' boutique.pk z.pk %}" class="text-brand">Modifier</a>
+              <form method="post" action="{% url 'boutiques_vendeur:zone_supprimer' boutique.pk z.pk %}" class="inline ml-2">{% csrf_token %}
+                <button class="text-red-600 hover:text-red-700">Supprimer</button>
               </form>
             </td>
           </tr>
         {% endfor %}
       </tbody>
-    </table>
+    </table></div>
   {% else %}
-    <p class="text-sm text-slate-500 mb-4">Aucune zone definie. Ajoutez au moins une zone couverte.</p>
+    <p class="text-sm text-muted mb-4">Aucune zone définie. Ajoutez au moins une zone couverte.</p>
   {% endif %}
 
-  <form method="post" action="{% url 'boutiques_vendeur:zone_creer' boutique.pk %}" class="champ-form flex flex-wrap items-end gap-3">
+  <form method="post" action="{% url 'boutiques_vendeur:zone_creer' boutique.pk %}" class="form-v flex flex-wrap items-end gap-3">
     {% csrf_token %}
-    <div><label>Zone</label>{{ zone_form.nom }}</div>
-    <div><label>Tarif (XAF)</label>{{ zone_form.tarif }}</div>
-    <div><label>Delai</label>{{ zone_form.delai_estime }}</div>
-    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-lg py-2 px-4">Ajouter</button>
+    <div class="w-full sm:w-40"><label>Zone</label>{{ zone_form.nom }}</div>
+    <div class="w-full sm:w-32"><label>Tarif (XAF)</label>{{ zone_form.tarif }}</div>
+    <div class="w-full sm:w-36"><label>Délai</label>{{ zone_form.delai_estime }}</div>
+    <button type="submit" class="inline-flex items-center gap-2 bg-soft hover:bg-slate-100 border border-line text-ink text-sm font-semibold rounded-lg py-2 px-4">
+      <svg class="ico"><use href="#i-plus"/></svg> Ajouter
+    </button>
   </form>
 </div>
 
 {% if soumettable %}
   <form method="post" action="{% url 'boutiques_vendeur:soumettre' boutique.pk %}">
     {% csrf_token %}
-    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg py-2.5">
-      Soumettre a validation
+    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg py-2.5 text-sm">
+      <svg class="ico"><use href="#i-check"/></svg> Soumettre à validation
     </button>
   </form>
 {% endif %}

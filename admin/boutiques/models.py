@@ -88,6 +88,11 @@ class Boutique(models.Model):
         db_column="decide_par_id",
     )
 
+    note_moyenne = models.DecimalField(
+        "note moyenne", max_digits=3, decimal_places=2, default=0, db_column="note_moyenne"
+    )
+    nombre_avis = models.PositiveIntegerField("nombre d'avis", default=0, db_column="nombre_avis")
+
     date_creation = models.DateTimeField(
         "creee le", auto_now_add=True, db_column="date_creation"
     )

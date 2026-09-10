@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import (
@@ -11,6 +12,12 @@ from django.urls import reverse_lazy
 from admin.abonnements.models import Abonnement, Plan
 from admin.abonnements.services import abonnement_actif
 from admin.kyc.models import DossierKYC
+from admin.paiements.gateway import HRSkillsPayError
+from admin.paiements.models import Paiement
+from admin.paiements.services import (
+    initier_paiement_abonnement,
+    synchroniser_statut,
+)
 
 from .decorators import vendeur_required
 from .forms import DossierKYCForm, InscriptionVendeurForm, ProfilVendeurForm
@@ -58,7 +65,7 @@ class Connexion(LoginView):
 
 
 class Deconnexion(LogoutView):
-    next_page = reverse_lazy("comptes_vendeur:connexion")
+    next_page = reverse_lazy("catalogue:landing")
 
 
 class ChangerMotDePasse(PasswordChangeView):
@@ -151,7 +158,7 @@ def onboarding_forfait(request):
 
 
 # ---------------------------------------------------------------------------
-# Onboarding - etape paiement (integration agregateur a venir)
+# Onboarding - etape paiement (agregateur HR-Skills Pay)
 # ---------------------------------------------------------------------------
 @vendeur_required
 def onboarding_paiement(request):
@@ -166,14 +173,44 @@ def onboarding_paiement(request):
             return redirect("comptes_vendeur:tableau_de_bord")
         return redirect("comptes_vendeur:forfait")
 
+    paiement = abonnement.paiements.order_by("-date_creation").first()
+
     if request.method == "POST":
-        # PROVISOIRE : sera remplace par le retour de l'agregateur de paiement.
-        abonnement.activer(reference="SIMULATION")
-        messages.success(request, "Paiement confirme. Votre boutique peut demarrer.")
-        return redirect("comptes_vendeur:tableau_de_bord")
+        action = request.POST.get("action")
+        if action == "verifier" and paiement:
+            try:
+                synchroniser_statut(paiement)
+            except HRSkillsPayError as err:
+                messages.error(request, f"Verification impossible : {err.message or err.code}")
+                return redirect("comptes_vendeur:paiement")
+            if abonnement_actif(user):
+                messages.success(request, "Paiement confirme. Votre boutique peut demarrer.")
+                return redirect("comptes_vendeur:tableau_de_bord")
+            paiement.refresh_from_db()
+            if paiement.statut == Paiement.Statut.ECHOUE:
+                messages.error(request, "Le paiement a echoue. Reessayez.")
+        elif action == "initier":
+            operateur = request.POST.get("operateur")
+            telephone = (request.POST.get("telephone") or "").strip()
+            if operateur not in dict(settings.OPERATEURS_MOBILE_MONEY) or not telephone:
+                messages.error(request, "Choisissez un operateur et saisissez votre numero.")
+            else:
+                try:
+                    initier_paiement_abonnement(abonnement, operateur, telephone)
+                except HRSkillsPayError as err:
+                    messages.error(request, f"Echec de l'initiation : {err.message or err.code}")
+                else:
+                    messages.success(
+                        request,
+                        "Paiement initie. Validez la demande sur votre telephone, puis cliquez sur Verifier.",
+                    )
+        return redirect("comptes_vendeur:paiement")
 
     return render(request, "vendeur/onboarding/paiement.html", {
-        "abonnement": abonnement, "etape": onboarding.PAIEMENT,
+        "abonnement": abonnement,
+        "paiement": paiement,
+        "operateurs": settings.OPERATEURS_MOBILE_MONEY,
+        "etape": onboarding.PAIEMENT,
     })
 
 

@@ -13,8 +13,13 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Charge les variables d'environnement depuis .env (non versionne).
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -57,15 +62,29 @@ INSTALLED_APPS = [
     'admin.produits',
     'vendeur.produits',
 
+    # Commandes (admin / acheteur / vendeur)
+    'admin.commandes',
+    'client.commandes',
+    'vendeur.commandes',
+
+    # Paiement (agregateur HR-Skills Pay)
+    'admin.paiements',
+
+    # Avis clients
+    'admin.avis',
+    'client.avis',
+
     # Espace client / acheteur (repertoire "client/")
+    'client.comptes',
     'client.catalogue',
     'client.panier',
+    'client.contact',
 ]
 
 # Authentification de l'espace vendeur
-LOGIN_URL = 'comptes_vendeur:connexion'
+LOGIN_URL = 'catalogue:connexion'
 LOGIN_REDIRECT_URL = 'comptes_vendeur:tableau_de_bord'
-LOGOUT_REDIRECT_URL = 'comptes_vendeur:connexion'
+LOGOUT_REDIRECT_URL = 'catalogue:landing'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -82,7 +101,7 @@ ROOT_URLCONF = 'marketplace.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -163,6 +182,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Fichiers televerses (logos de boutiques, etc.)
 MEDIA_URL = 'media/'
@@ -172,3 +192,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Modele utilisateur personnalise (application account).
 AUTH_USER_MODEL = 'account.User'
+
+
+# --- Agregateur de paiement HR-Skills Pay ---------------------------------
+# Ne jamais committer les cles : les fournir via variables d'environnement.
+HRSKILLS_BASE_URL = os.environ.get('HRSKILLS_BASE_URL', 'https://api.hrskills-pay.com')
+HRSKILLS_KEY_A = os.environ.get('HRSKILLS_KEY_A', '')          # hrsk_pk_live_... / hrsk_pk_test_...
+HRSKILLS_KEY_B = os.environ.get('HRSKILLS_KEY_B', '')          # hrsk_sk_... (jamais cote client)
+# Sans cle : mode simulation local (contrat sandbox : montant pair -> SUCCESS).
+HRSKILLS_MOCK = os.environ.get('HRSKILLS_MOCK', '') == '1' or not HRSKILLS_KEY_A
+# Confirmation des paiements par polling (GET /v1/payments/:ref) : bouton
+# "Verifier" cote utilisateur + commande de gestion "synchroniser_paiements".
+HRSKILLS_POLL_TIMEOUT_MIN = int(os.environ.get('HRSKILLS_POLL_TIMEOUT_MIN', '20'))
+
+# Operateurs Mobile Money disponibles au Cameroun.
+OPERATEURS_MOBILE_MONEY = [
+    ('orange', 'Orange Money'),
+    ('mtn', 'MTN MoMo'),
+    ('camtel', 'Camtel'),
+]

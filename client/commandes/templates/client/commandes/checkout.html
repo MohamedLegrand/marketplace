@@ -1,0 +1,61 @@
+{% extends "client/base.html" %}
+{% block titre %}Valider ma commande{% endblock %}
+
+{% block contenu %}
+<h1 class="text-2xl font-semibold text-ink mb-1">Validation de la commande</h1>
+<p class="text-sm text-muted mb-6">Boutique : <span class="text-fg font-medium">{{ boutique.nom }}</span></p>
+
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="bg-surface border border-line rounded-xl p-5">
+    <h2 class="font-semibold text-ink mb-3">Articles</h2>
+    <ul class="text-sm divide-y divide-line">
+      {% for l in lignes %}
+        <li class="py-2 flex justify-between">
+          <span class="text-fg">{{ l.produit.nom }}{% if l.variante %} — {{ l.variante.libelle }}{% endif %} × {{ l.quantite }}</span>
+          <span class="text-fg">{{ l.sous_total }} XAF</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <form method="post" class="form-c bg-surface border border-line rounded-xl p-5 space-y-4">
+    {% csrf_token %}
+    <div>
+      <h2 class="font-semibold text-ink mb-2 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-pin"/></svg> Adresse de livraison</h2>
+      {% if adresses %}
+        {% for a in adresses %}
+          <label class="flex items-start gap-2 text-sm py-1 text-fg">
+            <input type="radio" name="adresse" value="{{ a.pk }}" class="mt-1" {% if a.par_defaut %}checked{% endif %}>
+            <span>{{ a.libelle }} — {{ a.nom_destinataire }}, {{ a.ville }}{% if a.quartier %}, {{ a.quartier }}{% endif %}</span>
+          </label>
+        {% endfor %}
+      {% else %}
+        <p class="text-sm text-muted">Aucune adresse. <a href="{% url 'comptes_client:adresse_creer' %}" class="text-brand">En ajouter une</a>.</p>
+      {% endif %}
+    </div>
+
+    {% if zones %}
+      <div>
+        <h2 class="font-semibold text-ink mb-2 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-store"/></svg> Zone de livraison</h2>
+        {% for z in zones %}
+          <label class="flex items-center gap-2 text-sm py-1 text-fg">
+            <input type="radio" name="zone" value="{{ z.pk }}" {% if forloop.first %}checked{% endif %}>
+            <span>{{ z.nom }} — {{ z.tarif }} XAF{% if z.delai_estime %} ({{ z.delai_estime }}){% endif %}</span>
+          </label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-xs text-muted">Cette boutique n'a pas défini de zone de livraison ; frais à 0.</p>
+    {% endif %}
+
+    <div class="border-t border-line pt-3 text-sm space-y-1">
+      <div class="flex justify-between text-muted"><span>Sous-total</span><span>{{ sous_total }} XAF</span></div>
+      <div class="flex justify-between text-muted"><span>Livraison</span><span>selon la zone</span></div>
+    </div>
+
+    {% if adresses %}
+      <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Valider la commande</button>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

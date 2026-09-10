@@ -1,0 +1,20 @@
+{% extends "client/base.html" %}
+{% block titre %}Mon profil{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'comptes_client:tableau_de_bord' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg mb-3">
+  <svg class="ico"><use href="#i-back"/></svg> Mon compte
+</a>
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-6">
+  <h1 class="text-lg font-semibold text-ink mb-5">Mon profil</h1>
+  <form method="post" class="form-c">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <div class="flex items-center gap-4">
+      <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">Enregistrer</button>
+      <a href="{% url 'comptes_client:tableau_de_bord' %}" class="text-sm text-muted hover:text-fg">Retour</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

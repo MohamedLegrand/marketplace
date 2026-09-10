@@ -1,0 +1,7 @@
+{% comment %}Attend `statut` (valeur) et `libelle`.{% endcomment %}
+<span class="text-xs font-medium px-2 py-1 rounded-full border
+  {% if statut == 'livree' %}border-emerald-200 bg-emerald-50 text-emerald-700
+  {% elif statut == 'annulee' %}border-red-200 bg-red-50 text-red-700
+  {% elif statut == 'en_attente_paiement' %}border-amber-200 bg-amber-50 text-amber-800
+  {% elif statut == 'expediee' %}border-sky-200 bg-sky-50 text-sky-700
+  {% else %}border-line bg-soft text-muted{% endif %}">{{ libelle }}</span>

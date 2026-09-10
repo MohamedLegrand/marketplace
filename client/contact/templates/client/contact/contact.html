@@ -1,0 +1,48 @@
+{% extends "client/base.html" %}
+{% block titre %}Contact · Marketplace{% endblock %}
+
+{% block contenu %}
+<h1 class="text-2xl font-semibold text-ink">Contact</h1>
+<p class="text-muted mt-1 mb-8">Une question sur une commande, une boutique ou pour devenir vendeur ? Écrivez-nous.</p>
+
+<div class="grid md:grid-cols-2 gap-8">
+  <div>
+    <div class="bg-surface border border-line rounded-xl p-6">
+      <h2 class="font-semibold text-ink mb-4">Nous joindre</h2>
+
+      <a href="https://wa.me/{{ whatsapp_numero }}" target="_blank" rel="noopener"
+         class="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 hover:bg-emerald-100 transition-colors">
+        <span class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+          <svg style="width:18px;height:18px"><use href="#s-whatsapp"/></svg>
+        </span>
+        <span>
+          <span class="block text-sm font-semibold text-emerald-800">WhatsApp</span>
+          <span class="block text-sm text-emerald-700">{{ whatsapp_affiche }}</span>
+        </span>
+      </a>
+
+      <ul class="mt-4 space-y-3 text-sm text-fg">
+        <li class="flex items-center gap-3"><svg class="ico text-brand"><use href="#i-mail"/></svg>
+          <a href="mailto:{{ email_contact }}" class="hover:text-brand">{{ email_contact }}</a></li>
+        <li class="flex items-center gap-3"><svg class="ico text-brand"><use href="#i-pin"/></svg> Akwa, Douala — Cameroun</li>
+        <li class="flex items-center gap-3"><svg class="ico text-brand"><use href="#i-clock"/></svg> Lundi – samedi, 8h – 18h</li>
+      </ul>
+    </div>
+
+    <div class="bg-surface border border-line rounded-xl p-6 mt-4 text-sm text-muted">
+      <p class="font-semibold text-ink mb-1">À propos du site</p>
+      <p>Ce site a été développé par <span class="text-fg font-medium">Mme DONGMO Medong Jennifer</span>, Ingénieure logicielle.</p>
+    </div>
+  </div>
+
+  <div class="bg-surface border border-line rounded-xl p-6">
+    <h2 class="font-semibold text-ink mb-4">Envoyer un message</h2>
+    <form method="post" class="form-c">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      {{ form.as_p }}
+      <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Envoyer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

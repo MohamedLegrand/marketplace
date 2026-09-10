@@ -46,6 +46,11 @@ class Produit(models.Model):
         "masque par l'administrateur", default=False, db_column="masque_par_admin"
     )
 
+    note_moyenne = models.DecimalField(
+        "note moyenne", max_digits=3, decimal_places=2, default=0, db_column="note_moyenne"
+    )
+    nombre_avis = models.PositiveIntegerField("nombre d'avis", default=0, db_column="nombre_avis")
+
     date_creation = models.DateTimeField("cree le", auto_now_add=True, db_column="date_creation")
     date_modification = models.DateTimeField("modifie le", auto_now=True, db_column="date_modification")
 

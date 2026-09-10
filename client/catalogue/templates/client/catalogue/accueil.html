@@ -1,29 +1,80 @@
 {% extends "client/base.html" %}
-{% block titre %}Boutiques - Marketplace{% endblock %}
+{% block titre %}Marketplace{% endblock %}
 
 {% block contenu %}
-<h1 class="text-2xl font-bold mb-4">Les boutiques</h1>
+<h1 class="text-2xl font-semibold text-ink mb-4">Rechercher</h1>
 
-<form method="get" class="mb-6">
-  <input type="search" name="q" value="{{ recherche }}" placeholder="Rechercher une boutique, une ville..."
-         class="w-full sm:w-96 border border-slate-300 rounded-lg px-3 py-2 text-sm">
+<form method="get" class="form-c bg-surface border border-line rounded-xl p-4 mb-8 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
+  <div class="flex-1 sm:min-w-[220px]">
+    <label>Boutique ou produit</label>
+    <div class="field with-ico">
+      <svg class="field-ico"><use href="#i-search"/></svg>
+      <input type="search" name="q" value="{{ q }}" placeholder="Nom, ville, mot-clé…">
+    </div>
+  </div>
+  <div class="w-full sm:w-auto">
+    <label>Catégorie</label>
+    <select name="categorie" class="w-full sm:w-48">
+      <option value="">Toutes</option>
+      {% for c in categories %}
+        <option value="{{ c.pk }}" {% if categorie_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.get_type_display }} — {{ c.nom }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-center gap-3">
+    <button type="submit" class="w-full sm:w-auto bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2.5 px-5">Rechercher</button>
+    {% if recherche_active %}<a href="{% url 'catalogue:accueil' %}" class="text-sm text-muted hover:text-fg whitespace-nowrap">Réinitialiser</a>{% endif %}
+  </div>
 </form>
 
-{% if boutiques %}
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    {% for b in boutiques %}
-      <a href="{% url 'catalogue:boutique' b.slug %}" class="bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-400 flex gap-3">
-        <div class="w-14 h-14 rounded-lg bg-slate-100 shrink-0 overflow-hidden flex items-center justify-center text-slate-300 text-xs">
-          {% if b.logo %}<img src="{{ b.logo.url }}" class="w-full h-full object-cover">{% else %}logo{% endif %}
-        </div>
-        <div class="min-w-0">
-          <p class="font-semibold truncate">{{ b.nom }}</p>
-          <p class="text-sm text-slate-500">{{ b.ville }}{% if b.categorie %} &middot; {{ b.categorie }}{% endif %}</p>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-{% else %}
-  <p class="text-slate-500">Aucune boutique pour l'instant.</p>
+<section class="mb-10">
+  <h2 class="font-semibold text-ink mb-3 flex items-center gap-2">
+    <svg class="ico text-muted"><use href="#i-store"/></svg> Boutiques{% if recherche_active %} <span class="text-muted font-normal">({{ boutiques|length }})</span>{% endif %}
+  </h2>
+  {% if boutiques %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for b in boutiques %}
+        <a href="{% url 'catalogue:boutique' b.slug %}" class="bg-surface border border-line rounded-xl p-4 hover:border-brand/50 flex gap-3">
+          <div class="w-14 h-14 rounded-lg bg-slate-100 border border-line shrink-0 overflow-hidden flex items-center justify-center text-muted">
+            {% if b.logo %}<img src="{{ b.logo.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-store"/></svg>{% endif %}
+          </div>
+          <div class="min-w-0">
+            <p class="font-medium text-ink truncate">{{ b.nom }}</p>
+            <p class="text-sm text-muted">{{ b.ville }}{% if b.categorie %} · {{ b.categorie }}{% endif %}</p>
+            {% if b.nombre_avis %}<div class="mt-1">{% include "client/catalogue/_etoiles.html" with note=b.note_moyenne nb=b.nombre_avis %}</div>{% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted text-sm">Aucune boutique.</p>
+  {% endif %}
+</section>
+
+{% if recherche_active %}
+<section>
+  <h2 class="font-semibold text-ink mb-3 flex items-center gap-2">
+    <svg class="ico text-muted"><use href="#i-package"/></svg> Produits <span class="text-muted font-normal">({{ produits|length }})</span>
+  </h2>
+  {% if produits %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for p in produits %}
+        <a href="{% url 'catalogue:produit' p.boutique.slug p.slug %}" class="bg-surface border border-line rounded-xl overflow-hidden hover:border-brand/50">
+          <div class="aspect-square bg-slate-100 flex items-center justify-center text-muted">
+            {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
+          </div>
+          <div class="p-3">
+            <p class="font-medium text-ink truncate">{{ p.nom }}</p>
+            <p class="text-sm text-brand font-semibold">{{ p.prix }} XAF</p>
+            <p class="text-xs text-muted truncate">{{ p.boutique.nom }}</p>
+            {% if p.nombre_avis %}<div class="mt-1">{% include "client/catalogue/_etoiles.html" with note=p.note_moyenne nb=p.nombre_avis %}</div>{% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted text-sm">Aucun produit.</p>
+  {% endif %}
+</section>
 {% endif %}
 {% endblock %}

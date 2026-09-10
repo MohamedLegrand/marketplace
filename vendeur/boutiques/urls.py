@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.liste, name="liste"),
     path("creer/", views.creer, name="creer"),
     path("<int:pk>/", views.detail, name="detail"),
+    path("<int:pk>/avis/", views.avis, name="avis"),
     path("<int:pk>/modifier/", views.modifier, name="modifier"),
     path("<int:pk>/soumettre/", views.soumettre, name="soumettre"),
     path("<int:pk>/zones/ajouter/", views.zone_creer, name="zone_creer"),

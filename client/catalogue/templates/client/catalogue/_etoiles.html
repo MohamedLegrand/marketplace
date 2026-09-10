@@ -1,0 +1,7 @@
+{% comment %}Attend `note` (0-5) et, en option, `nb`.{% endcomment %}
+<span class="inline-flex items-center gap-0.5 text-amber-400">
+  {% for _ in "12345" %}
+    <svg style="width:14px;height:14px"><use href="{% if forloop.counter <= note %}#i-star-fill{% else %}#i-star{% endif %}"/></svg>
+  {% endfor %}
+</span>
+{% if nb %}<span class="text-xs text-muted ml-1">({{ nb }})</span>{% endif %}

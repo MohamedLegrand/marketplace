@@ -1,0 +1,25 @@
+{% extends "client/base.html" %}
+{% block titre %}Connexion{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-6">Connexion</h1>
+  <form method="post" class="form-c space-y-4">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+      <label>{{ form.username.label }}</label>
+      <div class="field with-ico"><svg class="field-ico"><use href="#i-mail"/></svg>{{ form.username }}</div>
+      {{ form.username.errors }}
+    </div>
+    <div>
+      <label>Mot de passe</label>
+      <div class="field with-ico pw-field"><svg class="field-ico"><use href="#i-lock"/></svg>{{ form.password }}</div>
+      {{ form.password.errors }}
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Se connecter</button>
+  </form>
+  <p class="text-sm text-muted mt-5">Pas de compte ? <a href="{% url 'comptes_client:inscription' %}" class="text-brand font-medium">Créer un compte</a></p>
+</div>
+{% endblock %}

@@ -1,17 +1,21 @@
 {% extends "vendeur/base.html" %}
 {% block titre %}{% if mode == "creer" %}Nouveau produit{% else %}Modifier le produit{% endif %}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Produit{% endblock %}
 
 {% block contenu %}
-<a href="{% if mode == 'modifier' %}{% url 'produits_vendeur:detail' boutique.pk produit.pk %}{% else %}{% url 'produits_vendeur:liste' boutique.pk %}{% endif %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Retour</a>
+<a href="{% if mode == 'modifier' %}{% url 'produits_vendeur:detail' boutique.pk produit.pk %}{% else %}{% url 'produits_vendeur:liste' boutique.pk %}{% endif %}"
+   class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg mb-3">
+  <svg class="ico"><use href="#i-back"/></svg> Retour
+</a>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
-  <h1 class="text-xl font-bold mb-6">{% if mode == "creer" %}Creer un produit{% else %}Modifier {{ produit.nom }}{% endif %}</h1>
-  <form method="post" class="champ-form">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-xl">
+  <h2 class="text-lg font-semibold text-ink mb-5">{% if mode == "creer" %}Créer un produit{% else %}Modifier {{ produit.nom }}{% endif %}</h2>
+  <form method="post" class="form-v">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
-      {% if mode == "creer" %}Creer{% else %}Enregistrer{% endif %}
+    <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+      {% if mode == "creer" %}Créer{% else %}Enregistrer{% endif %}
     </button>
   </form>
 </div>

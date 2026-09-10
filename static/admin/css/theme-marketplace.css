@@ -1,0 +1,501 @@
+/* ===================================================================
+   Marketplace - Theme d'administration
+   Un seul theme, identique a tout le site :
+   fond blanc, police bleu sombre. Pas de bascule clair/sombre.
+   =================================================================== */
+
+:root,
+:root:not([data-theme="dark"]),
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  color-scheme: light;
+
+  /* Fonds */
+  --body-bg: #ffffff;
+  --body-fg: #233a5c;
+  --body-quiet-color: #5f7492;
+  --body-loud-color: #132a4d;
+
+  --header-bg: #ffffff;
+  --header-color: #233a5c;
+  --header-branding-color: #132a4d;
+  --header-link-color: #233a5c;
+
+  --breadcrumbs-bg: #f4f7fb;
+  --breadcrumbs-fg: #5f7492;
+  --breadcrumbs-link-fg: #233a5c;
+
+  /* Surfaces */
+  --darkened-bg: #f4f7fb;
+  --selected-bg: #e8eefc;
+  --selected-row: #eef3fd;
+
+  /* Bordures */
+  --border-color: #e4e9f2;
+  --hairline-color: #eef1f6;
+
+  /* Liens */
+  --link-fg: #2f6fed;
+  --link-hover-color: #2559c9;
+  --link-selected-fg: #2559c9;
+  --link-visited-fg: #2f6fed;
+
+  /* Accent unique */
+  --primary: #2f6fed;
+  --primary-fg: #ffffff;
+  --secondary: #eef3fd;
+  --accent: #2f6fed;
+
+  /* Boutons */
+  --button-bg: #2f6fed;
+  --button-fg: #ffffff;
+  --button-hover-bg: #2559c9;
+  --default-button-bg: #2f6fed;
+  --default-button-hover-bg: #2559c9;
+  --close-button-bg: #64748b;
+  --close-button-hover-bg: #475569;
+  --delete-button-bg: #c0392b;
+  --delete-button-hover-bg: #a93226;
+
+  --object-tools-fg: #ffffff;
+  --object-tools-bg: #2f6fed;
+  --object-tools-hover-bg: #2559c9;
+
+  /* Messages */
+  --message-success-bg: #ecfdf3;
+  --message-warning-bg: #fef8ec;
+  --message-error-bg: #fdecec;
+  --error-fg: #c0392b;
+}
+
+/* ---------- Base ---------- */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a:link,
+a:visited { color: var(--link-fg); }
+a:hover,
+a:focus { color: var(--link-hover-color); }
+
+/* Une seule identite visuelle : masquer la bascule de theme */
+.theme-toggle { display: none !important; }
+
+/* ---------- En-tete ---------- */
+#header {
+  padding: 14px 40px;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: none;
+}
+#branding #site-name { margin: 0; font-weight: 400; }
+#branding #site-name a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+}
+.brand-mark { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.brand-text {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #132a4d;
+}
+.brand-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
+}
+.brand-sub {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--body-quiet-color);
+}
+#user-tools {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--body-quiet-color);
+}
+#user-tools a { border-bottom: 1px solid var(--border-color); }
+#user-tools a:hover { border-bottom-color: var(--link-hover-color); color: var(--link-hover-color); }
+
+/* ---------- Fil d'ariane ---------- */
+div.breadcrumbs {
+  padding: 11px 40px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Navigation laterale ---------- */
+#nav-sidebar {
+  background: #f8fafc;
+  border-right: 1px solid var(--border-color);
+}
+.toggle-nav-sidebar {
+  background: #f4f7fb;
+  border-right: 1px solid var(--border-color);
+  color: var(--body-quiet-color);
+}
+#nav-sidebar .current-model { background: var(--selected-bg); }
+#nav-sidebar a:focus,
+#nav-sidebar a:hover { background: #eef3fb; }
+#nav-sidebar .section:link,
+#nav-sidebar .section:visited { color: var(--body-quiet-color); }
+
+/* ---------- Modules / cartes ---------- */
+.module {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.module > h2,
+.module > caption,
+.inline-group h2,
+.dashboard .module table caption {
+  background: #f4f7fb;
+  color: #132a4d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+.module h3 { color: var(--body-fg); }
+.dashboard #content { max-width: 1100px; }
+
+/* ---------- Tables ---------- */
+#changelist .results {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+#changelist table thead th,
+.change-list #result_list thead th {
+  background: #f4f7fb;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+#changelist table thead th a:link,
+#changelist table thead th a:visited { color: #132a4d; }
+#result_list tbody tr:hover > * { background: #f4f7fb; }
+#changelist table tbody td,
+#changelist table tbody th { border-bottom: 1px solid var(--hairline-color); }
+
+/* ---------- Barre d'outils / recherche ---------- */
+#toolbar {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+}
+#toolbar form#changelist-search input[type="submit"] {
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: #fff;
+  border: 0;
+}
+#changelist-search #searchbar {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--body-fg);
+  padding: 8px 10px;
+}
+
+/* ---------- Filtres ---------- */
+#changelist-filter {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+#changelist-filter h2 {
+  background: #f4f7fb;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 12px 12px 0 0;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+#changelist-filter li.selected a { color: var(--link-hover-color); }
+
+/* ---------- Formulaires ---------- */
+.form-row { border-bottom: 1px solid var(--hairline-color); }
+fieldset.module { border: 1px solid var(--border-color); }
+
+input[type="text"], input[type="password"], input[type="email"], input[type="url"],
+input[type="number"], input[type="tel"], input[type="search"], input[type="date"],
+input[type="time"], input[type="datetime-local"], textarea, select, .vTextField {
+  background: #ffffff;
+  color: var(--body-fg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+input:focus, textarea:focus, select:focus, .vTextField:focus {
+  border-color: var(--primary);
+  outline: 2px solid rgba(47, 111, 237, 0.25);
+  outline-offset: 0;
+}
+select option { background: #ffffff; }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #233a5c;
+  caret-color: #233a5c;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+}
+.help, .helptext, p.help { color: var(--body-quiet-color); }
+.errornote {
+  background: var(--message-error-bg);
+  border: 1px solid #f2c2c2;
+  color: #a93226;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+ul.errorlist { color: #c0392b; }
+
+/* ---------- Boutons ---------- */
+.button, input[type="submit"], input[type="button"],
+.submit-row input, a.button, .object-tools a {
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.button, input[type="submit"], input[type="button"], .submit-row input {
+  padding: 9px 16px;
+}
+.button:active, input[type="submit"]:active { transform: translateY(1px); }
+.button.default, input[type="submit"].default, .submit-row input.default {
+  background: var(--primary);
+}
+.deletelink, a.deletelink {
+  background: var(--delete-button-bg);
+  border-radius: 8px;
+  color: #fff;
+}
+.object-tools a {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  padding: 8px 14px;
+}
+
+.submit-row {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+/* ---------- Messages ---------- */
+ul.messagelist li {
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  padding: 12px 14px 12px 42px;
+}
+ul.messagelist li.success { border-color: #b7e4c7; color: #1e7d45; }
+ul.messagelist li.warning { border-color: #f2dfa8; color: #8a6d1f; }
+ul.messagelist li.error { border-color: #f2c2c2; color: #a93226; }
+
+/* ---------- Pagination ---------- */
+.paginator {
+  border-top: 1px solid var(--border-color);
+  color: var(--body-quiet-color);
+}
+.paginator a:link, .paginator a:visited {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--link-fg);
+}
+.paginator .this-page {
+  background: var(--primary);
+  border-radius: 6px;
+  color: #fff;
+  padding: 2px 8px;
+}
+
+/* ---------- Inlines ---------- */
+.inline-group .tabular tr.add-row td { background: #f4f7fb; }
+.inline-related h3 {
+  background: #f4f7fb;
+  border-bottom: 1px solid var(--hairline-color);
+  color: var(--body-fg);
+}
+
+/* ---------- Selecteurs date / heure / m2m ---------- */
+.calendarbox, .clockbox {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+.calendar caption, .calendarbox h2 { background: #f4f7fb; color: #132a4d; }
+.calendar td.selected a { background: var(--primary); }
+.selector .selector-filter input {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+}
+.selector-available h2, .selector-chosen h2 {
+  background: #f4f7fb;
+  border: 1px solid var(--border-color);
+}
+
+/* ---------- Champ avec icone (login) ---------- */
+.field-wrap { position: relative; display: block; }
+.field-wrap .field-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--body-quiet-color);
+  pointer-events: none;
+}
+.field-wrap > input {
+  width: 100%;
+  padding-left: 38px !important;
+}
+
+/* ---------- Bascule mot de passe (icone oeil) ---------- */
+.pw-field { position: relative; display: block; }
+.pw-field > input,
+.field-wrap.pw-field > input { padding-right: 42px !important; }
+.pw-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--body-quiet-color);
+  cursor: pointer;
+}
+.pw-toggle:hover { color: var(--body-fg); background: rgba(19, 42, 77, 0.05); }
+.pw-toggle svg { width: 18px; height: 18px; }
+
+/* ---------- Page de connexion ---------- */
+body.login { background: #f4f7fb; padding: 24px 16px; }
+.login #container {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(19, 42, 77, 0.12);
+  padding: 0;
+  overflow: hidden;
+}
+.login #header {
+  padding: 22px 30px;
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+}
+.login #header .brand-sep { display: none; }
+.login #header #site-name a { gap: 10px; flex-wrap: wrap; }
+.login #content { padding: 26px 30px 30px; }
+.login .login-lead {
+  margin: 0 0 20px;
+  color: var(--body-quiet-color);
+  font-size: 13px;
+}
+.login .form-row { padding: 0; border: 0; }
+.login .form-row + .form-row { margin-top: 16px; }
+.login .form-row > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--body-quiet-color);
+}
+.login .submit-row {
+  margin: 22px 0 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.login .submit-row input {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+}
+.login .password-reset-link {
+  margin-top: 14px;
+  text-align: right;
+  font-size: 12px;
+}
+.login .errornote { margin-bottom: 16px; }
+
+/* ---------- Icones d'action : monochrome, un seul theme ----------
+   Django fournit des icones multicolores (plus vert, crayon orange,
+   oeil bleu, croix rouge). On les retire pour ne garder que le texte. */
+.addlink, .changelink, .viewlink, .deletelink,
+a.addlink, a.changelink, a.viewlink, a.deletelink,
+.object-tools a.addlink, .object-tools a,
+#nav-sidebar .addlink,
+#changelist .toplinks .addlink {
+  background-image: none !important;
+  padding-left: 0 !important;
+  padding-right: 14px !important;
+}
+.object-tools a { padding: 8px 14px !important; }
+
+/* Messages : pas d'icone, on s'appuie sur la bordure et la couleur du texte */
+ul.messagelist li {
+  background-image: none !important;
+  padding-left: 14px !important;
+}
+
+/* Petites icones sans texte (widgets liees, raccourcis date/heure) :
+   teintees en gris fonce uniforme, lisibles sur fond blanc.
+   `!important` : Django remet `filter: grayscale(0)` sur `.related-widget-wrapper-link:link`. */
+.related-widget-wrapper-link,
+.related-widget-wrapper-link:link,
+.related-widget-wrapper-link:visited,
+.datetimeshortcuts a,
+.selector-add, .selector-remove,
+.selector-chooseall, .selector-clearall {
+  filter: brightness(0) invert(0.42) !important;
+  opacity: 1 !important;
+}
+.related-widget-wrapper-link:hover,
+.datetimeshortcuts a:hover { filter: brightness(0) invert(0.25) !important; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  #header { padding: 12px 16px; }
+  div.breadcrumbs { padding: 10px 16px; }
+  #content, .colM, .colMS { padding-left: 12px; padding-right: 12px; }
+  #changelist .results,
+  .change-list #result_list,
+  .module table,
+  fieldset .form-row { overflow-x: auto; }
+  .submit-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .submit-row input, .submit-row a { flex: 1 1 auto; text-align: center; }
+  .object-tools { float: none; margin: 0 0 12px; }
+  .object-tools a { display: inline-block; margin-bottom: 6px; }
+}
+
+/* ---------- Divers ---------- */
+::selection { background: rgba(47, 111, 237, 0.18); }
+* { scrollbar-color: #c7d2e0 #f4f7fb; }

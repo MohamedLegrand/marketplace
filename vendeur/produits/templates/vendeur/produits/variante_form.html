@@ -1,16 +1,19 @@
 {% extends "vendeur/base.html" %}
 {% block titre %}Modifier une variante{% endblock %}
+{% block entete %}{{ produit.nom }} · Variante{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'produits_vendeur:detail' boutique.pk produit.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; {{ produit.nom }}</a>
+<a href="{% url 'produits_vendeur:detail' boutique.pk produit.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg mb-3">
+  <svg class="ico"><use href="#i-back"/></svg> {{ produit.nom }}
+</a>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
-  <h1 class="text-xl font-bold mb-6">Variante : {{ variante.libelle }}</h1>
-  <form method="post" class="champ-form">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-md">
+  <h2 class="text-lg font-semibold text-ink mb-5">Variante : {{ variante.libelle }}</h2>
+  <form method="post" class="form-v">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">Enregistrer</button>
+    <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">Enregistrer</button>
   </form>
 </div>
 {% endblock %}

@@ -46,6 +46,18 @@ def creer(request):
 
 
 @onboarding_complete_required
+def avis(request, pk):
+    boutique = _boutique_du_vendeur(request, pk)
+    from admin.avis.models import Avis
+
+    return render(request, "vendeur/boutiques/avis.html", {
+        "boutique": boutique,
+        "avis_boutique": boutique.avis.select_related("auteur"),
+        "avis_produits": Avis.objects.filter(produit__boutique=boutique).select_related("auteur", "produit"),
+    })
+
+
+@onboarding_complete_required
 def detail(request, pk):
     boutique = _boutique_du_vendeur(request, pk)
     return render(request, "vendeur/boutiques/detail.html", {

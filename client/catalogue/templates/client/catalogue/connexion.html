@@ -1,0 +1,32 @@
+{% extends "client/base.html" %}
+{% block titre %}Connexion · Marketplace{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-1">Connexion</h1>
+  <p class="text-sm text-muted mb-6">Accédez à votre espace acheteur ou vendeur.</p>
+
+  <form method="post" class="form-c space-y-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-red-200 bg-red-50 text-red-700 px-3 py-2 text-sm">
+        {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+      </div>
+    {% endif %}
+    <div>
+      <label>Adresse e-mail</label>
+      <div class="field with-ico"><svg class="field-ico"><use href="#i-mail"/></svg>{{ form.username }}</div>
+      {{ form.username.errors }}
+    </div>
+    <div>
+      <label>Mot de passe</label>
+      <div class="field with-ico pw-field"><svg class="field-ico"><use href="#i-lock"/></svg>{{ form.password }}</div>
+      {{ form.password.errors }}
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Se connecter</button>
+  </form>
+
+  <p class="text-sm text-muted mt-5">Pas encore de compte ? <a href="{% url 'catalogue:inscription' %}" class="text-brand font-medium">Créer un compte</a></p>
+</div>
+{% endblock %}

@@ -1,17 +1,20 @@
 {% extends "vendeur/base.html" %}
-{% block titre %}Changer de mot de passe{% endblock %}
+{% block titre %}Mot de passe{% endblock %}
+{% block entete %}Mot de passe{% endblock %}
 
 {% block contenu %}
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-  <h1 class="text-xl font-bold mb-6">Changer de mot de passe</h1>
-  <form method="post" class="champ-form">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-lg">
+  <h2 class="font-semibold text-ink mb-5 flex items-center gap-2">
+    <svg class="ico text-muted"><use href="#i-key"/></svg> Changer de mot de passe
+  </h2>
+  <form method="post" class="form-v">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
-      Mettre a jour
-    </button>
-    <a href="{% url 'comptes_vendeur:tableau_de_bord' %}" class="ml-3 text-sm text-slate-500">Annuler</a>
+    <div class="flex items-center gap-4 pt-1">
+      <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">Mettre à jour</button>
+      <a href="{% url 'comptes_vendeur:tableau_de_bord' %}" class="text-sm text-muted hover:text-fg">Annuler</a>
+    </div>
   </form>
 </div>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% extends "client/base.html" %}
+{% block titre %}Mes commandes{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'comptes_client:tableau_de_bord' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> Mon compte
+</a>
+<h1 class="text-2xl font-semibold text-ink mt-3 mb-5">Mes commandes</h1>
+
+{% if commandes %}
+  <div class="space-y-3">
+    {% for c in commandes %}
+      <a href="{% url 'commandes_client:detail' c.reference %}" class="block bg-surface border border-line rounded-xl p-4 hover:border-brand/50">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium text-ink">{{ c.reference }}</p>
+            <p class="text-sm text-muted">{{ c.boutique.nom }} · {{ c.date_creation|date:"d/m/Y" }} · {{ c.nb_articles }} article(s)</p>
+          </div>
+          <div class="text-right">
+            {% include "client/commandes/_statut.html" with statut=c.statut libelle=c.get_statut_display %}
+            <p class="font-semibold text-ink mt-1">{{ c.total }} XAF</p>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-receipt"/></svg>
+    <p class="text-muted mt-3 mb-4">Aucune commande pour l'instant.</p>
+    <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+      <svg class="ico"><use href="#i-store"/></svg> Voir les boutiques
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

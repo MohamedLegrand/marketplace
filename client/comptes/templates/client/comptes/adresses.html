@@ -1,0 +1,46 @@
+{% extends "client/base.html" %}
+{% block titre %}Mes adresses{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'comptes_client:tableau_de_bord' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> Mon compte
+</a>
+
+<div class="flex items-center justify-between mt-3 mb-5">
+  <h1 class="text-2xl font-semibold text-ink">Mes adresses de livraison</h1>
+  <a href="{% url 'comptes_client:adresse_creer' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+    <svg class="ico"><use href="#i-plus"/></svg> Nouvelle adresse
+  </a>
+</div>
+
+{% if adresses %}
+  <div class="space-y-3">
+    {% for a in adresses %}
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex gap-3">
+            <svg class="ico text-muted mt-0.5"><use href="#i-pin"/></svg>
+            <div>
+              <p class="font-medium text-ink">{{ a.libelle }}{% if a.par_defaut %} <span class="text-xs border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full ml-1">Par défaut</span>{% endif %}</p>
+              <p class="text-sm text-fg">{{ a.nom_destinataire }} · {{ a.telephone }}</p>
+              <p class="text-sm text-muted">{{ a.ville }}{% if a.quartier %}, {{ a.quartier }}{% endif %}{% if a.details %} — {{ a.details }}{% endif %}</p>
+            </div>
+          </div>
+          <div class="text-right text-sm whitespace-nowrap">
+            <a href="{% url 'comptes_client:adresse_modifier' a.pk %}" class="text-brand">Modifier</a>
+            {% if not a.par_defaut %}
+              <form method="post" action="{% url 'comptes_client:adresse_defaut' a.pk %}" class="inline ml-2">{% csrf_token %}<button class="text-muted hover:text-fg">Par défaut</button></form>
+            {% endif %}
+            <form method="post" action="{% url 'comptes_client:adresse_supprimer' a.pk %}" class="inline ml-2" onsubmit="return confirm('Supprimer cette adresse ?');">{% csrf_token %}<button class="text-red-600">Supprimer</button></form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-pin"/></svg>
+    <p class="text-muted mt-3">Aucune adresse enregistrée.</p>
+  </div>
+{% endif %}
+{% endblock %}

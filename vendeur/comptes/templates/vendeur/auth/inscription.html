@@ -1,22 +1,23 @@
-{% extends "vendeur/base.html" %}
-{% block titre %}Devenir vendeur{% endblock %}
+{% extends "client/base.html" %}
+{% block titre %}Devenir vendeur · Marketplace{% endblock %}
 
 {% block contenu %}
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-  <h1 class="text-xl font-bold mb-1">Creer un compte vendeur</h1>
-  <p class="text-sm text-slate-500 mb-6">Vendez vos produits sur la marketplace.</p>
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-1">Créer un compte vendeur</h1>
+  <p class="text-sm text-muted mb-6">Vendez vos produits sur la marketplace.</p>
 
-  <form method="post" class="champ-form">
+  <form method="post" class="form-c">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5">
-      Creer mon compte
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">
+      Créer mon compte
     </button>
   </form>
 
-  <p class="text-sm text-slate-500 mt-4">
-    Deja inscrit ? <a href="{% url 'comptes_vendeur:connexion' %}" class="text-indigo-600 font-medium">Se connecter</a>
+  <p class="text-sm text-muted mt-5">
+    Déjà inscrit ?
+    <a href="{% url 'catalogue:connexion' %}" class="text-brand font-medium">Se connecter</a>
   </p>
 </div>
 {% endblock %}

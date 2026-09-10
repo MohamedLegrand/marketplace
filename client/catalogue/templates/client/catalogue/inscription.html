@@ -1,0 +1,26 @@
+{% extends "client/base.html" %}
+{% block titre %}Créer un compte · Marketplace{% endblock %}
+
+{% block contenu %}
+<div class="max-w-2xl mx-auto text-center">
+  <h1 class="text-2xl font-semibold text-ink">Créer un compte</h1>
+  <p class="text-muted mt-1 mb-8">Souhaitez-vous acheter ou vendre sur la marketplace ?</p>
+
+  <div class="grid sm:grid-cols-2 gap-4">
+    <a href="{% url 'comptes_client:inscription' %}" class="bg-surface border border-line rounded-xl p-6 hover:border-brand/50 text-left">
+      <span class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center"><svg class="ico"><use href="#i-user"/></svg></span>
+      <p class="font-semibold text-ink mt-3">Compte acheteur</p>
+      <p class="text-sm text-muted mt-1">Parcourir les boutiques, commander et payer par Mobile Money. Gratuit.</p>
+      <span class="inline-flex items-center gap-1.5 text-sm text-brand font-medium mt-3">Je m'inscris comme acheteur <svg class="ico"><use href="#i-arrow"/></svg></span>
+    </a>
+    <a href="{% url 'comptes_vendeur:inscription' %}" class="bg-surface border border-line rounded-xl p-6 hover:border-brand/50 text-left">
+      <span class="w-10 h-10 rounded-lg bg-brand/10 text-brand flex items-center justify-center"><svg class="ico"><use href="#i-store"/></svg></span>
+      <p class="font-semibold text-ink mt-3">Compte vendeur</p>
+      <p class="text-sm text-muted mt-1">Ouvrir ma boutique en ligne, gérer produits, commandes et équipe. Sur abonnement.</p>
+      <span class="inline-flex items-center gap-1.5 text-sm text-brand font-medium mt-3">Je m'inscris comme vendeur <svg class="ico"><use href="#i-arrow"/></svg></span>
+    </a>
+  </div>
+
+  <p class="text-sm text-muted mt-6">Déjà un compte ? <a href="{% url 'catalogue:connexion' %}" class="text-brand font-medium">Se connecter</a></p>
+</div>
+{% endblock %}

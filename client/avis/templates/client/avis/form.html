@@ -1,0 +1,20 @@
+{% extends "client/base.html" %}
+{% block titre %}Donner mon avis{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-6">
+  <h1 class="text-lg font-semibold text-ink mb-1">{% if modification %}Modifier mon avis{% else %}Donner mon avis{% endif %}</h1>
+  <p class="text-sm text-muted mb-5">
+    {% if type == "produit" %}Produit : {{ cible.nom }}{% else %}Boutique : {{ cible.nom }}{% endif %}
+  </p>
+  <form method="post" class="form-c space-y-3">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div><label>Note</label>{{ form.note }}{{ form.note.errors }}</div>
+    <div><label>Commentaire</label>{{ form.commentaire }}{{ form.commentaire.errors }}</div>
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">
+      {% if modification %}Enregistrer{% else %}Publier mon avis{% endif %}
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "client/base.html" %}
+{% block titre %}Créer un compte{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+  <h1 class="text-lg font-semibold text-ink mb-1">Créer mon compte</h1>
+  <p class="text-sm text-muted mb-6">Pour passer commande sur la marketplace.</p>
+  <form method="post" class="form-c">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Créer mon compte</button>
+  </form>
+  <p class="text-sm text-muted mt-5">Déjà un compte ? <a href="{% url 'catalogue:connexion' %}" class="text-brand font-medium">Se connecter</a></p>
+</div>
+{% endblock %}

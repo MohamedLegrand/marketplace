@@ -1,0 +1,44 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Avis · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Avis{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
+<h2 class="text-xl font-semibold text-ink mt-3 mb-1">Avis reçus</h2>
+<p class="text-sm text-muted mb-6">
+  Note boutique : <span class="text-fg font-medium">{{ boutique.note_moyenne }}/5</span> ({{ boutique.nombre_avis }} avis)
+</p>
+
+<h3 class="font-semibold text-ink mb-2">Sur la boutique</h3>
+{% if avis_boutique %}
+  <div class="space-y-2 mb-6">
+    {% for a in avis_boutique %}
+      <div class="bg-surface border border-line rounded-xl p-3 text-sm">
+        <span class="inline-flex items-center gap-1 text-amber-700 font-medium">
+          <svg class="ico" style="width:13px;height:13px"><use href="#i-star"/></svg>{{ a.note }}/5
+        </span>
+        <span class="text-muted text-xs ml-1">{{ a.auteur.email }} · {{ a.date_creation|date:"d/m/Y" }}</span>
+        {% if a.statut == "masque" %}<span class="text-xs text-red-600 ml-1">(masqué)</span>{% endif %}
+        {% if a.commentaire %}<p class="text-fg mt-1">{{ a.commentaire }}</p>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}<p class="text-sm text-muted mb-6">Aucun avis sur la boutique.</p>{% endif %}
+
+<h3 class="font-semibold text-ink mb-2">Sur les produits</h3>
+{% if avis_produits %}
+  <div class="space-y-2">
+    {% for a in avis_produits %}
+      <div class="bg-surface border border-line rounded-xl p-3 text-sm">
+        <p class="font-medium text-ink">{{ a.produit.nom }}</p>
+        <span class="text-amber-700 text-xs">{{ a.note }}/5</span>
+        <span class="text-muted text-xs ml-1">{{ a.auteur.email }} · {{ a.date_creation|date:"d/m/Y" }}</span>
+        {% if a.statut == "masque" %}<span class="text-xs text-red-600 ml-1">(masqué)</span>{% endif %}
+        {% if a.commentaire %}<p class="text-fg mt-1">{{ a.commentaire }}</p>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}<p class="text-sm text-muted">Aucun avis sur les produits.</p>{% endif %}
+{% endblock %}

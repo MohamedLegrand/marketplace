@@ -1,0 +1,62 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}{{ commande.reference }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · {{ commande.reference }}{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'commandes_vendeur:liste' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> Commandes
+</a>
+
+<div class="flex items-center justify-between mt-3 mb-4">
+  <h2 class="text-xl font-semibold text-ink">{{ commande.reference }}</h2>
+  <span class="text-xs font-medium px-2 py-1 rounded-full border border-line bg-soft text-fg">{{ commande.get_statut_display }}</span>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4">
+  <div class="bg-surface border border-line rounded-xl p-5">
+    <h3 class="font-semibold text-ink mb-3">Articles</h3>
+    <ul class="text-sm divide-y divide-line">
+      {% for l in commande.lignes.all %}
+        <li class="py-2 flex justify-between"><span class="text-fg">{{ l.designation }} × {{ l.quantite }}</span><span class="text-fg">{{ l.sous_total }} XAF</span></li>
+      {% endfor %}
+    </ul>
+    <div class="border-t border-line mt-2 pt-2 text-sm space-y-1">
+      <div class="flex justify-between text-muted"><span>Sous-total</span><span>{{ commande.sous_total }} XAF</span></div>
+      <div class="flex justify-between text-muted"><span>Livraison{% if commande.zone_nom %} ({{ commande.zone_nom }}){% endif %}</span><span>{{ commande.frais_livraison }} XAF</span></div>
+      <div class="flex justify-between font-semibold text-ink pt-1"><span>Total</span><span>{{ commande.total }} XAF</span></div>
+    </div>
+  </div>
+
+  <div class="bg-surface border border-line rounded-xl p-5">
+    <h3 class="font-semibold text-ink mb-2">Client &amp; livraison</h3>
+    <p class="text-sm text-fg">{{ commande.adresse_nom }} · {{ commande.adresse_telephone }}</p>
+    <p class="text-sm text-muted">{{ commande.adresse_ville }}{% if commande.adresse_quartier %}, {{ commande.adresse_quartier }}{% endif %}{% if commande.adresse_details %} — {{ commande.adresse_details }}{% endif %}</p>
+    <p class="text-sm text-muted mt-2">Compte : {{ commande.client.email }}</p>
+  </div>
+</div>
+
+<div class="bg-surface border border-line rounded-xl p-5 mt-4">
+  <h3 class="font-semibold text-ink mb-3">Mettre à jour le statut</h3>
+  {% if transitions %}
+    <form method="post" action="{% url 'commandes_vendeur:changer_statut' boutique.pk commande.pk %}" class="form-v flex flex-wrap items-end gap-3">
+      {% csrf_token %}
+      <select name="statut" class="w-auto">
+        {% for t in transitions %}<option value="{{ t }}">{{ t.label }}</option>{% endfor %}
+      </select>
+      <input type="text" name="commentaire" placeholder="Commentaire (facultatif)" class="flex-1 min-w-[180px]">
+      <button class="bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">Appliquer</button>
+    </form>
+  {% else %}
+    <p class="text-sm text-muted">Aucune action possible pour ce statut.</p>
+  {% endif %}
+</div>
+
+<div class="bg-surface border border-line rounded-xl p-5 mt-4">
+  <h3 class="font-semibold text-ink mb-3">Historique</h3>
+  <ul class="text-sm space-y-1.5">
+    {% for s in commande.suivis.all %}
+      <li class="text-muted">{{ s.date|date:"d/m/Y H:i" }} · {{ s.get_nouveau_statut_display|default:s.nouveau_statut }}{% if s.auteur %} <span class="text-muted">(par {{ s.auteur.email }})</span>{% endif %}{% if s.commentaire %} — {{ s.commentaire }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

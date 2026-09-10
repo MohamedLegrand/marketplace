@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}{{ block.super }}
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="{% static 'admin/css/theme-marketplace.css' %}">
+{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+  <script src="{% static 'admin/js/password-toggle.js' %}" defer></script>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">
+    <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 9 4.5 4h15L21 9"/>
+      <path d="M4 9v11h16V9"/>
+      <path d="M4 9a3 3 0 0 0 6 0 3 3 0 0 0 4 0 3 3 0 0 0 6 0"/>
+      <path d="M9 20v-5h6v5"/>
+    </svg>
+    <span class="brand-text">Marketplace</span>
+    <span class="brand-sep" aria-hidden="true"></span>
+    <span class="brand-sub">Administration</span>
+  </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

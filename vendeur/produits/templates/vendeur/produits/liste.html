@@ -1,34 +1,42 @@
 {% extends "vendeur/base.html" %}
-{% block titre %}Produits - {{ boutique.nom }}{% endblock %}
+{% block titre %}Produits · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Produits{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; {{ boutique.nom }}</a>
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
 
 <div class="flex items-center justify-between mt-3 mb-5">
-  <h1 class="text-2xl font-bold">Produits</h1>
-  <a href="{% url 'produits_vendeur:creer' boutique.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">+ Nouveau produit</a>
+  <h2 class="text-xl font-semibold text-ink">Produits</h2>
+  <a href="{% url 'produits_vendeur:creer' boutique.pk %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+    <svg class="ico"><use href="#i-plus"/></svg> Nouveau produit
+  </a>
 </div>
 
 {% if produits %}
   <div class="grid sm:grid-cols-2 gap-3">
     {% for p in produits %}
-      <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="bg-white rounded-xl border border-slate-200 p-4 hover:border-indigo-400 flex gap-3">
-        <div class="w-16 h-16 rounded-lg bg-slate-100 shrink-0 overflow-hidden flex items-center justify-center text-slate-300 text-xs">
-          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}photo{% endif %}
+      <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="bg-surface border border-line rounded-xl p-4 hover:border-brand/50 flex gap-3">
+        <div class="w-16 h-16 rounded-lg bg-soft border border-line shrink-0 overflow-hidden flex items-center justify-center text-muted">
+          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
         </div>
         <div class="min-w-0">
-          <p class="font-semibold truncate">{{ p.nom }}</p>
-          <p class="text-sm text-slate-500">{{ p.prix }} XAF &middot; stock {{ p.stock_total }}</p>
+          <p class="font-medium text-ink truncate">{{ p.nom }}</p>
+          <p class="text-sm text-muted">{{ p.prix }} XAF · stock {{ p.stock_total }}</p>
           <p class="text-xs mt-1">
-            {% if p.masque_par_admin %}<span class="text-red-600">Masque par l'admin</span>
-            {% elif p.actif %}<span class="text-emerald-600">En vente</span>
-            {% else %}<span class="text-slate-400">Hors vente</span>{% endif %}
+            {% if p.masque_par_admin %}<span class="text-red-600">Masqué par l'admin</span>
+            {% elif p.actif %}<span class="text-emerald-700">En vente</span>
+            {% else %}<span class="text-muted">Hors vente</span>{% endif %}
           </p>
         </div>
       </a>
     {% endfor %}
   </div>
 {% else %}
-  <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">Aucun produit pour l'instant.</div>
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-package"/></svg>
+    <p class="text-muted mt-3">Aucun produit pour l'instant.</p>
+  </div>
 {% endif %}
 {% endblock %}

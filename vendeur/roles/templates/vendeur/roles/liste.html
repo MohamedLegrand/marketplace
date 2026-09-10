@@ -1,50 +1,49 @@
 {% extends "vendeur/base.html" %}
-{% block titre %}Equipe - {{ boutique.nom }}{% endblock %}
+{% block titre %}Équipe · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Équipe{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; {{ boutique.nom }}</a>
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
 
 <div class="flex items-center justify-between mt-3 mb-5">
-  <h1 class="text-2xl font-bold">Equipe de la boutique</h1>
+  <h2 class="text-xl font-semibold text-ink">Équipe de la boutique</h2>
   {% if peut_ajouter %}
-    <a href="{% url 'roles_vendeur:ajouter' boutique.pk %}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg py-2 px-4">+ Ajouter un membre</a>
+    <a href="{% url 'roles_vendeur:ajouter' boutique.pk %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+      <svg class="ico"><use href="#i-plus"/></svg> Ajouter un membre
+    </a>
   {% endif %}
 </div>
 
 {% if not peut_ajouter %}
-  <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 mb-4">{{ message_quota }}</div>
+  <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 text-sm mb-4">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-info"/></svg><span>{{ message_quota }}</span>
+  </div>
 {% endif %}
 
 {% if roles %}
-  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="bg-slate-50 text-slate-400 text-left">
-        <tr><th class="py-2 px-3">Membre</th><th>Role</th><th>Permissions</th><th>Etat</th><th></th></tr>
+  <div class="bg-surface border border-line rounded-xl overflow-x-auto">
+    <table class="w-full min-w-[640px] text-sm">
+      <thead class="bg-soft text-muted text-left">
+        <tr><th class="py-2.5 px-3 font-medium">Membre</th><th class="font-medium">Rôle</th><th class="font-medium">Permissions</th><th class="font-medium">État</th><th></th></tr>
       </thead>
       <tbody>
         {% for r in roles %}
-          <tr class="border-t border-slate-100">
-            <td class="py-2 px-3">{{ r.utilisateur.email }}</td>
-            <td>{{ r.libelle|default:r.get_type_role_display }}<div class="text-xs text-slate-400">{{ r.get_type_role_display }}</div></td>
-            <td class="text-xs text-slate-500">
-              {% if r.peut_gerer_produits %}Produits &middot; {% endif %}
-              {% if r.peut_gerer_stock %}Stock &middot; {% endif %}
-              {% if r.peut_gerer_commandes %}Commandes &middot; {% endif %}
-              {% if r.peut_voir_statistiques %}Stats{% endif %}
+          <tr class="border-t border-line">
+            <td class="py-2.5 px-3 text-fg">{{ r.utilisateur.email }}</td>
+            <td class="text-fg">{{ r.libelle|default:r.get_type_role_display }}<div class="text-xs text-muted">{{ r.get_type_role_display }}</div></td>
+            <td class="text-xs text-muted">
+              {% if r.peut_gerer_produits %}Produits · {% endif %}{% if r.peut_gerer_stock %}Stock · {% endif %}{% if r.peut_gerer_commandes %}Commandes · {% endif %}{% if r.peut_voir_statistiques %}Stats{% endif %}
             </td>
             <td>
-              {% if r.actif %}<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Actif</span>
-              {% else %}<span class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">Inactif</span>{% endif %}
+              {% if r.actif %}<span class="text-xs border border-emerald-200 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Actif</span>
+              {% else %}<span class="text-xs border border-line bg-soft text-muted px-2 py-0.5 rounded-full">Inactif</span>{% endif %}
             </td>
             <td class="text-right whitespace-nowrap px-3">
-              <a href="{% url 'roles_vendeur:modifier' boutique.pk r.pk %}" class="text-indigo-600">Modifier</a>
-              <form method="post" action="{% url 'roles_vendeur:basculer' boutique.pk r.pk %}" class="inline ml-2">{% csrf_token %}
-                <button class="text-slate-600">{% if r.actif %}Desactiver{% else %}Activer{% endif %}</button>
-              </form>
-              <form method="post" action="{% url 'roles_vendeur:retirer' boutique.pk r.pk %}" class="inline ml-2"
-                    onsubmit="return confirm('Retirer ce membre de l\'equipe ?');">{% csrf_token %}
-                <button class="text-red-600">Retirer</button>
-              </form>
+              <a href="{% url 'roles_vendeur:modifier' boutique.pk r.pk %}" class="text-brand">Modifier</a>
+              <form method="post" action="{% url 'roles_vendeur:basculer' boutique.pk r.pk %}" class="inline ml-2">{% csrf_token %}<button class="text-muted hover:text-fg">{% if r.actif %}Désactiver{% else %}Activer{% endif %}</button></form>
+              <form method="post" action="{% url 'roles_vendeur:retirer' boutique.pk r.pk %}" class="inline ml-2" onsubmit="return confirm('Retirer ce membre de l\'équipe ?');">{% csrf_token %}<button class="text-red-600">Retirer</button></form>
             </td>
           </tr>
         {% endfor %}
@@ -52,8 +51,9 @@
     </table>
   </div>
 {% else %}
-  <div class="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-500">
-    Aucun membre pour l'instant.
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-users"/></svg>
+    <p class="text-muted mt-3">Aucun membre pour l'instant.</p>
   </div>
 {% endif %}
 {% endblock %}

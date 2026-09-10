@@ -1,20 +1,23 @@
 {% extends "vendeur/base.html" %}
 {% block titre %}{% if mode == "creer" %}Nouvelle boutique{% else %}Modifier la boutique{% endif %}{% endblock %}
+{% block entete %}{% if mode == "creer" %}Nouvelle boutique{% else %}{{ boutique.nom }}{% endif %}{% endblock %}
 
 {% block contenu %}
-<a href="{% if mode == 'modifier' %}{% url 'boutiques_vendeur:detail' boutique.pk %}{% else %}{% url 'boutiques_vendeur:liste' %}{% endif %}" class="text-sm text-slate-500 hover:text-indigo-600">&larr; Retour</a>
+<a href="{% if mode == 'modifier' %}{% url 'boutiques_vendeur:detail' boutique.pk %}{% else %}{% url 'boutiques_vendeur:liste' %}{% endif %}"
+   class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg mb-3">
+  <svg class="ico"><use href="#i-back"/></svg> Retour
+</a>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-3">
-  <h1 class="text-xl font-bold mb-6">
-    {% if mode == "creer" %}Creer ma boutique{% else %}Modifier {{ boutique.nom }}{% endif %}
-  </h1>
-
-  <form method="post" enctype="multipart/form-data" class="champ-form">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-xl">
+  <h2 class="text-lg font-semibold text-ink mb-5">
+    {% if mode == "creer" %}Créer ma boutique{% else %}Modifier {{ boutique.nom }}{% endif %}
+  </h2>
+  <form method="post" enctype="multipart/form-data" class="form-v">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 px-5">
-      {% if mode == "creer" %}Creer en brouillon{% else %}Enregistrer{% endif %}
+    <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+      {% if mode == "creer" %}Créer en brouillon{% else %}Enregistrer{% endif %}
     </button>
   </form>
 </div>

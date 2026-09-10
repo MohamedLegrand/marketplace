@@ -1,0 +1,204 @@
+{% extends "client/base.html" %}
+{% block titre %}À propos · Marketplace{% endblock %}
+{% block main_wrap %}{% endblock %}
+
+{% block contenu %}
+{# ---------- En-tête ---------- #}
+<section class="border-b border-line bg-gradient-to-b from-[#eef3fc] to-white">
+  <div class="max-w-3xl mx-auto px-4 py-16 text-center">
+    <p class="inline-flex items-center gap-2 text-xs uppercase tracking-[.16em] text-brand border border-brand/30 bg-brand/10 rounded-full px-3 py-1">
+      <svg class="ico"><use href="#i-store"/></svg> À propos
+    </p>
+    <h1 class="text-3xl sm:text-4xl font-bold text-ink mt-5">Marketplace, la place de marché du Cameroun</h1>
+    <p class="text-muted mt-4 leading-relaxed">
+      Marketplace est une plateforme de commerce en ligne multi-vendeurs pensée pour le
+      contexte camerounais. Elle réunit sur un même espace les boutiques de commerçants,
+      d'artisans et d'entrepreneurs de tout le pays, et permet à leurs clients d'acheter
+      simplement, en payant par Mobile Money ou par carte bancaire.
+    </p>
+  </div>
+</section>
+
+<div class="max-w-3xl mx-auto px-4 py-14 space-y-14 text-[15px] leading-relaxed">
+
+  {# ---------- Mission ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Notre mission</h2>
+    <p class="text-fg">
+      Démocratiser l'accès au commerce en ligne. Trop de petits commerçants et d'artisans
+      camerounais n'ont pas les moyens techniques ou financiers d'ouvrir une boutique
+      numérique. Marketplace lève cette barrière : en quelques minutes, sans aucune
+      compétence en informatique, n'importe qui peut créer sa vitrine, publier ses produits
+      et recevoir des commandes.
+    </p>
+    <p class="text-fg mt-3">
+      Côté acheteurs, l'objectif est tout aussi simple : offrir un catalogue centralisé,
+      fiable et sécurisé, où l'on trouve en un seul endroit les produits de dizaines de
+      boutiques, avec un paiement local et un suivi de commande clair.
+    </p>
+  </section>
+
+  {# ---------- Le contexte ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Le contexte</h2>
+    <p class="text-fg">
+      Le commerce de détail camerounais est dynamique mais très fragmenté : marchés,
+      boutiques de quartier, vendeurs sur les réseaux sociaux. La vente en ligne y reste
+      freinée par le coût des sites individuels, la complexité des solutions de paiement et
+      l'absence d'outils de gestion adaptés. Dans le même temps, l'usage du Mobile Money
+      (Orange Money, MTN MoMo) est massif et quotidien.
+    </p>
+    <p class="text-fg mt-3">
+      Marketplace part de cette réalité : une seule plateforme, un abonnement mensuel
+      accessible pour les vendeurs, des paiements Mobile Money natifs, et une logistique
+      gérée localement par chaque boutique — au plus près des habitudes du terrain.
+    </p>
+  </section>
+
+  {# ---------- Pour les acheteurs ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Pour les acheteurs</h2>
+    <ol class="space-y-3">
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">1</span>
+        <span class="text-fg"><strong class="text-ink">Parcourez</strong> les boutiques et les produits. Recherchez par nom, par ville ou filtrez par catégorie.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">2</span>
+        <span class="text-fg"><strong class="text-ink">Ajoutez au panier</strong>. Un panier ne contient les articles que d'une seule boutique à la fois, pour une livraison cohérente.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">3</span>
+        <span class="text-fg"><strong class="text-ink">Créez votre compte</strong>, enregistrez vos adresses de livraison et choisissez la zone couverte par la boutique.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">4</span>
+        <span class="text-fg"><strong class="text-ink">Payez</strong> par Mobile Money. Vous validez la demande sur votre téléphone, la commande est transmise à la boutique.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">5</span>
+        <span class="text-fg"><strong class="text-ink">Suivez</strong> votre commande (confirmée, en préparation, expédiée, livrée) et, après réception, laissez un avis sur le produit et la boutique.</span></li>
+    </ol>
+  </section>
+
+  {# ---------- Pour les vendeurs ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Pour les vendeurs</h2>
+    <p class="text-fg mb-3">
+      L'ouverture d'une boutique suit un parcours guidé, pensé pour être franchissable
+      sans accompagnement :
+    </p>
+    <ol class="space-y-3">
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">1</span>
+        <span class="text-fg"><strong class="text-ink">Inscription</strong> avec une adresse e-mail et un numéro de téléphone.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">2</span>
+        <span class="text-fg"><strong class="text-ink">Vérification d'identité (KYC)</strong> : pièce d'identité officielle et, pour les entreprises, registre de commerce. Un administrateur contrôle le dossier avant validation.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">3</span>
+        <span class="text-fg"><strong class="text-ink">Choix d'un forfait</strong> mensuel puis paiement via l'agrégateur — condition d'activation de la boutique.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">4</span>
+        <span class="text-fg"><strong class="text-ink">Création de la boutique</strong> : nom, logo, description, catégorie, coordonnées, puis soumission à la validation d'un administrateur.</span></li>
+      <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-brand/10 text-brand text-xs font-semibold flex items-center justify-center shrink-0">5</span>
+        <span class="text-fg"><strong class="text-ink">Gestion au quotidien</strong> : produits (photos, prix, stock, variantes), zones de livraison et tarifs, commandes reçues et leur statut, rôles délégués à l'équipe (caissier, vendeurs…).</span></li>
+    </ol>
+  </section>
+
+  {# ---------- Forfaits ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Les forfaits</h2>
+    <p class="text-fg mb-4">
+      La plateforme se rémunère exclusivement par l'abonnement mensuel des boutiques —
+      aucune commission n'est prélevée sur les ventes. Trois formules :
+    </p>
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <p class="font-semibold text-ink">Essentiel</p>
+        <p class="text-sm text-muted mt-1">Une boutique, création de rôles limitée. Pour se lancer.</p>
+      </div>
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <p class="font-semibold text-ink">Pro</p>
+        <p class="text-sm text-muted mt-1">Boutiques et rôles illimités. Pour développer son activité.</p>
+      </div>
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <p class="font-semibold text-ink">Premium</p>
+        <p class="text-sm text-muted mt-1">Tout le Pro, plus une analyse des ventes assistée par IA.</p>
+      </div>
+    </div>
+    <p class="text-xs text-muted mt-3">Les tarifs et quotas exacts sont fixés par l'administrateur et peuvent évoluer.</p>
+  </section>
+
+  {# ---------- Paiement ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Le paiement</h2>
+    <p class="text-fg">
+      Les encaissements (commandes des clients et abonnements des vendeurs) passent par un
+      agrégateur de paiement reconnu, compatible avec le marché camerounais : Mobile Money
+      Orange et MTN, ainsi que la carte bancaire. Le client valide chaque paiement depuis
+      son téléphone.
+    </p>
+    <p class="text-fg mt-3">
+      Aucune donnée bancaire n'est stockée sur la plateforme : la saisie et la sécurisation
+      des paiements sont entièrement déléguées à l'agrégateur. La confirmation d'un paiement
+      déclenche automatiquement la confirmation de la commande ou l'activation de
+      l'abonnement.
+    </p>
+  </section>
+
+  {# ---------- Confiance ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Vérification, modération et livraison</h2>
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <svg class="ico text-brand" style="width:18px;height:18px"><use href="#i-shield"/></svg>
+        <p class="font-semibold text-ink mt-2">Boutiques vérifiées</p>
+        <p class="text-sm text-muted mt-1">Toute boutique est validée manuellement par un administrateur avant sa mise en ligne. Un compte non conforme peut être suspendu ou désactivé.</p>
+      </div>
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <svg class="ico text-brand" style="width:18px;height:18px"><use href="#i-star"/></svg>
+        <p class="font-semibold text-ink mt-2">Avis modérés</p>
+        <p class="text-sm text-muted mt-1">Les avis ne peuvent être déposés qu'après réception d'une commande livrée. L'administrateur peut masquer un avis abusif.</p>
+      </div>
+      <div class="bg-surface border border-line rounded-xl p-4">
+        <svg class="ico text-brand" style="width:18px;height:18px"><use href="#i-truck"/></svg>
+        <p class="font-semibold text-ink mt-2">Livraison locale</p>
+        <p class="text-sm text-muted mt-1">Chaque boutique définit ses zones de livraison et leurs tarifs, et gère elle-même l'acheminement des commandes.</p>
+      </div>
+    </div>
+  </section>
+
+  {# ---------- Roadmap ---------- #}
+  <section>
+    <h2 class="text-xl font-semibold text-ink mb-3">Ce qui vient ensuite</h2>
+    <p class="text-fg mb-3">
+      La version actuelle est un socle web complet. Les évolutions envisagées :
+    </p>
+    <ul class="space-y-2 text-fg">
+      <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-arrow"/></svg> Application mobile Android et iOS.</li>
+      <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-arrow"/></svg> Notifications e-mail et SMS pour les commandes et validations.</li>
+      <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-arrow"/></svg> Messagerie interne entre acheteurs et vendeurs.</li>
+      <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-arrow"/></svg> Livraison centralisée et partenariats transporteurs.</li>
+      <li class="flex items-center gap-2"><svg class="ico text-brand"><use href="#i-arrow"/></svg> Ouverture à d'autres pays de la zone CEMAC.</li>
+    </ul>
+  </section>
+
+  {# ---------- Développement ---------- #}
+  <section class="bg-soft border border-line rounded-xl p-6">
+    <h2 class="text-xl font-semibold text-ink mb-3">Développement du site</h2>
+    <p class="text-fg">
+      Ce site a été conçu et développé par <span class="font-semibold text-ink">Mme DONGMO Medong Jennifer</span>,
+      Ingénieure logicielle. La conception fonctionnelle, l'architecture technique, le
+      développement de l'ensemble des espaces (public, acheteur, vendeur et administration),
+      l'intégration de l'agrégateur de paiement et la mise en production ont été réalisés
+      dans le cadre de ce projet.
+    </p>
+    <p class="text-fg mt-3">
+      La plateforme repose sur une architecture web classique : back-end Django (Python) et
+      base de données MySQL, interfaces en HTML, Tailwind CSS et JavaScript.
+    </p>
+  </section>
+
+  {# ---------- CTA ---------- #}
+  <section class="text-center">
+    <h2 class="text-lg font-semibold text-ink">Une question ?</h2>
+    <p class="text-muted mt-1 mb-4">Notre équipe répond par WhatsApp ou par e-mail.</p>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a href="{% url 'contact:contact' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+        Nous contacter
+      </a>
+      <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 border border-line hover:border-brand/60 text-fg font-semibold rounded-lg py-2.5 px-5 text-sm">
+        Parcourir les boutiques
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}
