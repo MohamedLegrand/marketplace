@@ -1,0 +1,52 @@
+{% load i18n %}
+<button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="{% translate 'Toggle navigation' %}"></button>
+<nav class="sticky" id="nav-sidebar" aria-label="{% translate 'Sidebar' %}">
+
+  <div class="nav-brand">
+    <span class="nav-brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9 4.5 4h15L21 9"/><path d="M4 9v11h16V9"/>
+        <path d="M4 9a3 3 0 0 0 6 0 3 3 0 0 0 4 0 3 3 0 0 0 6 0"/><path d="M9 20v-5h6v5"/>
+      </svg>
+    </span>
+    <span class="nav-brand-text">
+      <b>Marketplace</b>
+      <span>Admin console</span>
+    </span>
+  </div>
+
+  <div class="nav-badge">Accès administrateur</div>
+
+  <input type="search" id="nav-filter"
+         placeholder="Filtrer les sections…"
+         aria-label="{% translate 'Filter navigation items' %}">
+
+  {% include 'admin/app_list.html' with app_list=available_apps show_changelinks=False %}
+
+  <div class="nav-spacer"></div>
+
+  <a class="nav-viewsite" href="{{ site_url|default:'/' }}" target="_blank" rel="noopener">Voir le site public</a>
+
+  {% if request.user.is_authenticated %}
+  <div class="nav-user">
+    <span class="nav-user-avatar">
+      {% if request.user.first_name or request.user.last_name %}{{ request.user.first_name|slice:':1'|upper }}{{ request.user.last_name|slice:':1'|upper }}{% else %}{{ request.user.email|slice:':2'|upper }}{% endif %}
+    </span>
+    <span class="nav-user-id">
+      <b>{{ request.user.get_full_name|default:request.user.get_username }}</b>
+      <span>Administrateur</span>
+    </span>
+  </div>
+  <form id="nav-logout-form" method="post" action="{% url 'admin:logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="nav-logout">{% translate 'Log out' %}</button>
+  </form>
+  {% endif %}
+
+  <script>
+    /* Evite qu'un filtre de navigation memorise ne masque des sections.
+       Place a l'interieur de <nav> pour ne pas casser le selecteur
+       `#nav-sidebar + .content` de la mise en page Django. */
+    try { sessionStorage.removeItem('django.admin.navSidebarFilterValue'); } catch (e) {}
+  </script>
+</nav>

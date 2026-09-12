@@ -1,0 +1,26 @@
+{% extends "client/base.html" %}
+{% block titre %}Déjà connecté · Marketplace{% endblock %}
+
+{% block contenu %}
+<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7 text-center">
+  <div class="mx-auto w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center mb-4">
+    <svg class="ico" style="width:22px;height:22px"><use href="#i-user"/></svg>
+  </div>
+  <h1 class="text-lg font-semibold text-ink mb-1">Vous êtes déjà connecté</h1>
+  <p class="text-sm text-muted mb-6">
+    Ce navigateur est connecté avec le compte
+    <span class="text-fg font-medium">{{ request.user.email }}</span>
+    ({{ request.user.get_role_display }}). Un même e-mail ne peut être lié qu'à
+    un seul compte : pour créer un compte {{ cible }}, déconnectez-vous d'abord,
+    puis inscrivez-vous avec une autre adresse e-mail.
+  </p>
+  <form method="post" action="{% url 'comptes_client:deconnexion' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'comptes_client:inscription' %}">
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm inline-flex items-center justify-center gap-2">
+      <svg class="ico"><use href="#i-logout"/></svg> Me déconnecter et continuer
+    </button>
+  </form>
+  <p class="text-sm text-muted mt-4"><a href="{% url 'catalogue:landing' %}" class="text-brand font-medium">Retour à l'accueil</a></p>
+</div>
+{% endblock %}

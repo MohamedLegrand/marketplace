@@ -14,7 +14,15 @@ BACKEND = "django.contrib.auth.backends.ModelBackend"
 
 def inscription(request):
     if request.user.is_authenticated:
-        return redirect("comptes_client:tableau_de_bord")
+        if request.user.role == request.user.Role.ACHETEUR:
+            return redirect("comptes_client:tableau_de_bord")
+        # Deja connecte, mais avec un autre type de compte (vendeur, admin...) :
+        # rediriger vers le tableau de bord acheteur declencherait un 403
+        # (page presque vide) au lieu du formulaire attendu. On affiche une
+        # page claire et actionnable plutot qu'un simple message discret.
+        return render(request, "client/comptes/deja_connecte.html", {
+            "cible": "acheteur",
+        })
     form = InscriptionClientForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -28,6 +36,15 @@ class Connexion(LoginView):
     template_name = "client/comptes/connexion.html"
     redirect_authenticated_user = True
     next_page = reverse_lazy("comptes_client:tableau_de_bord")
+
+    def get_default_redirect_url(self):
+        # Utilisateur deja connecte avec un autre role : eviter le 403 en le
+        # renvoyant vers la page d'inscription, qui affiche alors une
+        # explication claire (au lieu d'un tableau de bord acheteur auquel
+        # il n'a pas acces).
+        if self.request.user.role != self.request.user.Role.ACHETEUR:
+            return reverse_lazy("comptes_client:inscription")
+        return super().get_default_redirect_url()
 
 
 class Deconnexion(LogoutView):

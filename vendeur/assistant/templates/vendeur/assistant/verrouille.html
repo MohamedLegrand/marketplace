@@ -1,0 +1,33 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Assistant IA · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Assistant IA{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
+
+<div class="bg-surface border border-line rounded-xl p-8 mt-4 text-center max-w-lg mx-auto">
+  <span class="inline-flex w-14 h-14 rounded-full bg-brand/10 text-brand items-center justify-center mb-4">
+    <svg class="ico" style="width:24px;height:24px"><use href="#i-lock-2"/></svg>
+  </span>
+  <h1 class="text-lg font-semibold text-ink mb-1">Assistant IA réservé à certains forfaits</h1>
+  <p class="text-sm text-muted mb-5">{{ motif }}</p>
+
+  {% if plans %}
+  <div class="text-left space-y-2 mb-6">
+    <p class="text-xs font-semibold uppercase tracking-wide text-muted mb-2">Forfait(s) incluant l'assistant IA</p>
+    {% for p in plans %}
+      <div class="flex items-center justify-between bg-soft rounded-lg px-3.5 py-2.5 text-sm">
+        <span class="text-fg font-medium">{{ p.nom }}</span>
+        <span class="text-ink font-semibold">{{ p.prix }} XAF/mois</span>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <a href="{% url 'contact:contact' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+    <svg class="ico"><use href="#i-mail"/></svg> Nous contacter pour changer de forfait
+  </a>
+</div>
+{% endblock %}

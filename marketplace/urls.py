@@ -14,6 +14,7 @@ urlpatterns = [
     path("vendeur/boutiques/<int:boutique_pk>/equipe/", include("vendeur.roles.urls")),
     path("vendeur/boutiques/<int:boutique_pk>/produits/", include("vendeur.produits.urls")),
     path("vendeur/boutiques/<int:boutique_pk>/commandes/", include("vendeur.commandes.urls")),
+    path("vendeur/boutiques/<int:boutique_pk>/assistant/", include("vendeur.assistant.urls")),
     path("vendeur/boutiques/", include("vendeur.boutiques.urls")),
     path("vendeur/", include("vendeur.comptes.urls")),
     path("compte/avis/", include("client.avis.urls")),

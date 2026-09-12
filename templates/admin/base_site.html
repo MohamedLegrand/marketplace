@@ -1,13 +1,13 @@
 {% extends "admin/base.html" %}
-{% load static %}
+{% load static cachebust %}
 
 {% block extrastyle %}{{ block.super }}
   <meta name="color-scheme" content="light">
-  <link rel="stylesheet" href="{% static 'admin/css/theme-marketplace.css' %}">
+  <link rel="stylesheet" href="{% static_v 'admin/css/theme-marketplace.css' %}">
 {% endblock %}
 
 {% block extrahead %}{{ block.super }}
-  <script src="{% static 'admin/js/password-toggle.js' %}" defer></script>
+  <script src="{% static_v 'admin/js/password-toggle.js' %}" defer></script>
 {% endblock %}
 
 {% block branding %}

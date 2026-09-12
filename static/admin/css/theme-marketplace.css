@@ -83,7 +83,16 @@ a:focus { color: var(--link-hover-color); }
 /* Une seule identite visuelle : masquer la bascule de theme */
 .theme-toggle { display: none !important; }
 
-/* ---------- En-tete ---------- */
+/* ---------- En-tete ----------
+   Sur desktop la marque, l'utilisateur et la deconnexion vivent dans la barre
+   laterale : l'en-tete Django est masque. Sur mobile (barre laterale masquee),
+   on le reaffiche comme navigation de secours. */
+@media (min-width: 768px) {
+  body:not(.login) #header { display: none; }
+}
+@media (max-width: 767px) {
+  #nav-sidebar, #toggle-nav-sidebar { display: none !important; }
+}
 #header {
   padding: 14px 40px;
   border-bottom: 1px solid var(--border-color);
@@ -132,28 +141,240 @@ div.breadcrumbs {
   letter-spacing: 0.02em;
 }
 
-/* ---------- Navigation laterale ---------- */
+/* ===================================================================
+   Navigation laterale : barre permanente, toujours visible sur desktop
+   =================================================================== */
+@media (min-width: 768px) {
+  /* On neutralise la bascule Django : la sidebar reste ouverte. */
+  #toggle-nav-sidebar { display: none !important; }
+  /* `position: fixed` plutot que le `sticky` de Django : un element sticky
+     imbrique dans un flex qui defile provoque un bug de rendu Chrome/Windows
+     (texte « fantome », dedouble a l'ecran pendant le defilement). En fixed,
+     la barre est ancree au viewport et ne se repeint plus au scroll. */
+  .main > #nav-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    max-height: none !important;
+    margin-left: 0 !important;
+    visibility: visible !important;
+    z-index: 20;
+  }
+  .main > #nav-sidebar + .content,
+  .main.shifted > #nav-sidebar + .content {
+    margin-left: 280px !important;
+    min-width: 0;
+    max-width: calc(100% - 280px) !important;
+  }
+}
+
 #nav-sidebar {
+  box-sizing: border-box;
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
   background: #f8fafc;
   border-right: 1px solid var(--border-color);
+  padding: 16px 12px 16px;
 }
-.toggle-nav-sidebar {
-  background: #f4f7fb;
-  border-right: 1px solid var(--border-color);
-  color: var(--body-quiet-color);
-}
-#nav-sidebar .current-model { background: var(--selected-bg); }
-#nav-sidebar a:focus,
-#nav-sidebar a:hover { background: #eef3fb; }
-#nav-sidebar .section:link,
-#nav-sidebar .section:visited { color: var(--body-quiet-color); }
+/* Cause reelle du contenu « manquant » : #nav-sidebar est un flex-container
+   colonne plus court que son contenu (13 sections). Sans ceci, flexbox
+   *retrecit* chaque enfant (marque, cartes de sections, pied de page) pour
+   les faire tenir dans la hauteur du viewport au lieu de les laisser
+   deborder et defiler -> le texte des liens se comprime jusqu'a disparaitre.
+   On fige la taille naturelle de chaque enfant ; seul .nav-spacer peut
+   grandir, et la barre defile normalement (overflow-y ci-dessus). */
+#nav-sidebar > * { flex: 0 0 auto; }
 
-/* ---------- Modules / cartes ---------- */
+/* --- Bloc marque en haut de la barre --- */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 2px 4px 14px;
+}
+.nav-brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #132a4d;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.nav-brand-mark svg { width: 19px; height: 19px; }
+.nav-brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.nav-brand-text b { font-size: 14px; font-weight: 700; color: var(--body-loud-color); letter-spacing: -0.01em; }
+.nav-brand-text span {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--body-quiet-color);
+  margin-top: 1px;
+}
+.nav-badge {
+  align-self: flex-start;
+  margin: 0 4px 14px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--body-quiet-color);
+  background: #ffffff;
+}
+
+#nav-filter {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--body-fg);
+  font-size: 12.5px;
+  padding: 8px 11px;
+  margin: 0 0 14px;
+}
+#nav-filter::placeholder { color: #93a3ba; }
+#nav-filter:focus { border-color: var(--primary); outline: 2px solid rgba(47, 111, 237, 0.18); }
+
+/* La barre laterale : on aplatit completement la structure <table> de Django
+   en blocs simples. `!important` sur `display` pour battre a la fois les
+   valeurs par defaut du tableau et le CSS du tableau de bord. */
+#nav-sidebar .module,
+#nav-sidebar .module table,
+#nav-sidebar .module caption,
+#nav-sidebar .module tbody,
+#nav-sidebar .module tr,
+#nav-sidebar .module th {
+  display: block !important;
+  width: auto !important;
+}
+#nav-sidebar .module thead,
+#nav-sidebar .module td { display: none !important; }
+
+#nav-sidebar .module { margin: 0 0 16px; padding: 0; background: transparent; border: 0; }
+#nav-sidebar .module caption {
+  padding: 2px 12px 6px !important;
+  background: transparent !important;
+  border: 0 !important;
+  font-size: 10.5px !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--body-quiet-color) !important;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.35;
+}
+#nav-sidebar .module caption a.section {
+  color: inherit !important;
+  text-decoration: none;
+}
+#nav-sidebar .module tr { margin: 0; }
+#nav-sidebar .module th { padding: 0 !important; margin: 0; font-weight: 400; }
+#nav-sidebar .module th a {
+  position: relative;
+  display: block;
+  padding: 8px 12px;
+  margin: 1px 0;
+  border-radius: 8px;
+  color: var(--body-fg) !important;
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: normal;
+}
+#nav-sidebar .module th a:hover,
+#nav-sidebar .module th a:focus { background: #eef2fb; color: var(--link-fg) !important; }
+#nav-sidebar .current-model th a {
+  background: #e8eefc;
+  color: var(--link-fg) !important;
+  font-weight: 600;
+}
+#nav-sidebar .current-model th a::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+}
+#nav-sidebar .current-app caption a.section { color: var(--body-loud-color) !important; }
+
+/* --- Pied de la barre : utilisateur + deconnexion --- */
+#nav-sidebar > .nav-spacer { flex: 1 1 auto; min-height: 12px; }
+a.nav-viewsite {
+  display: block;
+  padding: 8px 8px;
+  font-size: 12px;
+  color: var(--body-quiet-color) !important;
+  text-decoration: none;
+  border-radius: 8px;
+}
+a.nav-viewsite:hover { background: #eef2fb; color: var(--link-fg) !important; }
+#nav-sidebar .nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+.nav-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-user-id { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.nav-user-id b {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--body-loud-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-user-id span { font-size: 11px; color: var(--body-quiet-color); }
+#nav-logout-form { margin: 6px 0 0; padding: 0 2px; }
+button.nav-logout {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--body-fg);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .12s, color .12s, background-color .12s;
+}
+button.nav-logout:hover { border-color: var(--delete-button-bg); color: var(--delete-button-bg); background: #fdf2f2; }
+
+/* ===================================================================
+   Modules / cartes
+   =================================================================== */
 .module {
   background: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(19, 42, 77, 0.04);
 }
 .module > h2,
 .module > caption,
@@ -163,13 +384,151 @@ div.breadcrumbs {
   color: #132a4d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 12px 16px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--border-color);
 }
 .module h3 { color: var(--body-fg); }
-.dashboard #content { max-width: 1100px; }
+/* En-tete de carte du tableau de bord : compact, une ligne si possible. */
+.dashboard .module table caption {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  padding: 11px 16px;
+}
+
+/* Titre de page (« Gestion de la plateforme », etc.) */
+#content > h1,
+.colM > h1,
+.colMS > h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--body-loud-color);
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+
+/* ===================================================================
+   Tableau de bord : grille de cartes de sections (page d'accueil admin)
+   Toutes les regles sont limitees a #content pour ne jamais toucher
+   la barre laterale (#nav-sidebar).
+   =================================================================== */
+.dashboard #content,
+.dashboard #content.colMS {
+  width: auto !important;                 /* Django impose width:600px  */
+  max-width: 1400px;
+  margin-right: 0 !important;             /* Django impose margin-right:300px */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.dashboard #content > h1 {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+}
+.dashboard #content-main {                /* transparent : ses .module deviennent des items de #content */
+  display: contents;
+  float: none !important;
+  width: auto !important;
+}
+.dashboard #content-related {
+  grid-column: 1 / -1;
+  float: none !important;
+  width: auto !important;
+  margin: 4px 0 0 !important;
+}
+.dashboard #content-related .module { background: #ffffff; padding-bottom: 6px; }
+.dashboard #content-related h2 { background: #f4f7fb; }
+.dashboard #content-related h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--body-quiet-color);
+  padding: 13px 18px 2px;
+  margin: 0;
+}
+.dashboard #content-related .actionlist { padding: 6px 18px 16px; margin: 0; }
+.dashboard #content-related .actionlist li { line-height: 1.5; font-size: 13px; padding: 3px 0; }
+.dashboard #content-related p { padding: 4px 18px 16px; margin: 0; color: var(--body-quiet-color); font-size: 13px; }
+
+/* Carte de section */
+.dashboard #content > .module,
+.dashboard #content-related {
+  align-self: start;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(19, 42, 77, 0.04);
+  overflow: hidden;
+}
+.dashboard #content .module table { width: 100%; border-collapse: collapse; }
+.dashboard #content .module thead { display: none; }
+.dashboard #content .module caption {
+  display: block;
+  text-align: left;
+  background: #f4f7fb;
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--body-loud-color);
+  line-height: 1.35;
+  white-space: normal;
+}
+.dashboard #content .module caption a.section { color: inherit; text-decoration: none; }
+.dashboard #content .module caption a.section:hover { color: var(--link-fg); }
+
+.dashboard #content .module tbody tr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--hairline-color);
+}
+.dashboard #content .module tbody tr:last-child { border-bottom: 0; }
+.dashboard #content .module tbody tr:hover { background: #f7f9fd; }
+.dashboard #content .module tbody th,
+.dashboard #content .module tbody td {
+  display: block;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.dashboard #content .module tbody th {
+  flex: 1 1 55%;
+  min-width: 120px;
+  font-weight: 600;
+  white-space: normal;
+}
+.dashboard #content .module tbody th a {
+  color: var(--body-loud-color);
+  text-decoration: none;
+  font-size: 13.5px;
+}
+.dashboard #content .module tbody th a:hover { color: var(--link-fg); }
+.dashboard #content .module tbody td { flex: 0 0 auto; }
+.dashboard #content .module tbody td:empty { display: none; }
+.dashboard #content .module tbody td a {
+  display: inline-block !important;
+  padding: 0 !important;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--body-quiet-color);
+  text-decoration: none;
+  background: none !important;
+  border: 0 !important;
+}
+.dashboard #content .module tbody td a:hover { color: var(--link-fg); }
+.dashboard #content .module tbody td a.addlink::before { content: "+ "; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .dashboard #content, .dashboard #content.colMS { grid-template-columns: 1fr; }
+}
 
 /* ---------- Tables ---------- */
 #changelist .results {
@@ -448,7 +807,7 @@ body.login { background: #f4f7fb; padding: 24px 16px; }
 
 /* ---------- Icones d'action : monochrome, un seul theme ----------
    Django fournit des icones multicolores (plus vert, crayon orange,
-   oeil bleu, croix rouge). On les retire pour ne garder que le texte. */
+   oeil bleu, croix rouge). On les retire ; les liens deviennent des boutons. */
 .addlink, .changelink, .viewlink, .deletelink,
 a.addlink, a.changelink, a.viewlink, a.deletelink,
 .object-tools a.addlink, .object-tools a,
@@ -456,9 +815,26 @@ a.addlink, a.changelink, a.viewlink, a.deletelink,
 #changelist .toplinks .addlink {
   background-image: none !important;
   padding-left: 0 !important;
-  padding-right: 14px !important;
 }
 .object-tools a { padding: 8px 14px !important; }
+
+/* (Les liens d'action du tableau de bord sont styles dans la section
+   « Tableau de bord » plus haut, en liens texte simples.) */
+
+/* Liens d'action dans les listes (colonne de gauche) : pilules compactes */
+#result_list td a.changelink,
+#result_list td a.addlink {
+  display: inline-block;
+  padding: 4px 11px !important;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--body-fg);
+}
+#result_list td a.changelink:hover,
+#result_list td a.addlink:hover { border-color: var(--primary); color: var(--link-fg); }
 
 /* Messages : pas d'icone, on s'appuie sur la bordure et la couleur du texte */
 ul.messagelist li {

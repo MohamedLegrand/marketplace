@@ -1,0 +1,97 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Assistant IA · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Assistant IA{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
+
+<div class="flex items-center justify-between mt-3 mb-4">
+  <div class="flex items-center gap-2.5">
+    <span class="w-9 h-9 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
+      <svg class="ico"><use href="#i-sparkle"/></svg>
+    </span>
+    <div>
+      <h2 class="text-xl font-semibold text-ink leading-tight">Assistant IA</h2>
+      <p class="text-xs text-muted">Analyse des ventes de « {{ boutique.nom }} »</p>
+    </div>
+  </div>
+  {% if historique %}
+  <form method="post" onsubmit="return confirm('Effacer tout l’historique de cette conversation ?');">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="reinitialiser">
+    <button type="submit" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+      <svg class="ico"><use href="#i-refresh"/></svg> Recommencer
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="bg-surface border border-line rounded-xl flex flex-col" style="height:min(60vh,560px)">
+  <div id="ia-fil" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+    {% if not historique %}
+      <div class="text-center py-10">
+        <span class="inline-flex w-11 h-11 rounded-full bg-brand/10 text-brand items-center justify-center mb-3">
+          <svg class="ico" style="width:20px;height:20px"><use href="#i-sparkle"/></svg>
+        </span>
+        <p class="text-sm font-medium text-ink">Posez une question sur vos ventes</p>
+        <p class="text-sm text-muted mt-1 max-w-sm mx-auto">
+          Par exemple : « Quels sont mes produits les plus vendus ? » ou
+          « Comment augmenter mon chiffre d'affaires ce mois-ci ? »
+        </p>
+      </div>
+    {% endif %}
+    {% for m in historique %}
+      {% if m.role == "utilisateur" %}
+        <div class="flex justify-end">
+          <div class="max-w-[85%] sm:max-w-[70%] bg-brand text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm whitespace-pre-line">{{ m.contenu }}</div>
+        </div>
+      {% else %}
+        <div class="flex justify-start gap-2.5">
+          <span class="w-7 h-7 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="ico" style="width:14px;height:14px"><use href="#i-sparkle"/></svg>
+          </span>
+          <div class="max-w-[85%] sm:max-w-[70%] bg-soft text-fg rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm whitespace-pre-line">{{ m.contenu }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <form id="ia-form" method="post" class="border-t border-line p-3 sm:p-4 flex items-end gap-2.5">
+    {% csrf_token %}
+    <textarea name="contenu" rows="1" required placeholder="Posez votre question sur vos ventes…"
+      class="flex-1 resize-none bg-white border border-line rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-2 focus:outline-brand/30"></textarea>
+    <button type="submit" class="shrink-0 inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg px-4 py-2.5 text-sm">
+      <svg class="ico"><use href="#i-send"/></svg> <span class="hidden sm:inline">Envoyer</span>
+    </button>
+  </form>
+</div>
+
+<p class="text-xs text-muted mt-3">
+  L'assistant s'appuie sur les données actuelles de votre boutique (catalogue, commandes, avis). Vérifiez toujours les chiffres importants avant une décision.
+</p>
+
+<script>
+  (function () {
+    var fil = document.getElementById('ia-fil');
+    if (fil) { fil.scrollTop = fil.scrollHeight; }
+    var form = document.getElementById('ia-form');
+    var champ = form ? form.querySelector('textarea[name=contenu]') : null;
+    if (form && champ) {
+      form.addEventListener('submit', function (e) {
+        if (!champ.value.trim()) { e.preventDefault(); return; }
+        var bouton = form.querySelector('button[type=submit]');
+        if (bouton) { bouton.disabled = true; bouton.classList.add('opacity-60'); }
+      });
+      champ.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (champ.value.trim()) { form.requestSubmit(); }
+        }
+      });
+      champ.focus();
+    }
+  })();
+</script>
+{% endblock %}

@@ -17,6 +17,7 @@
   <a href="{% url 'commandes_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-bag"/></svg> Commandes</a>
   <a href="{% url 'boutiques_vendeur:avis' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-star"/></svg> Avis</a>
   <a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-users"/></svg> Équipe</a>
+  <a href="{% url 'assistant_vendeur:chat' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-sparkle"/></svg> Assistant IA</a>
 </div>
 
 {% if boutique.statut == "rejetee" and boutique.motif_rejet %}

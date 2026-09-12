@@ -39,6 +39,18 @@ def peut_creer_boutique(vendeur):
     return True, ""
 
 
+def peut_utiliser_ia(vendeur):
+    ab = abonnement_actif(vendeur)
+    if ab is None:
+        return False, "Aucun abonnement actif : souscrivez a un plan incluant l'IA d'analyse des ventes."
+    if not ab.plan.ia_analyse_ventes:
+        return False, (
+            f"Le plan « {ab.plan.nom} » n'inclut pas l'assistant IA d'analyse des ventes. "
+            "Passez a un plan superieur pour en beneficier."
+        )
+    return True, ""
+
+
 def peut_creer_role(boutique):
     from admin.boutiques.models import RoleBoutique
 

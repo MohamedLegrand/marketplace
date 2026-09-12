@@ -70,6 +70,9 @@ INSTALLED_APPS = [
     # Paiement (agregateur HR-Skills Pay)
     'admin.paiements',
 
+    # Assistant IA d'analyse des ventes (reserve au forfait qui l'inclut)
+    'vendeur.assistant',
+
     # Avis clients
     'admin.avis',
     'client.avis',
@@ -147,20 +150,10 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# Aucune contrainte de robustesse sur les mots de passe : un utilisateur peut
+# saisir n'importe quel mot de passe (court, courant, numerique...) sans que
+# le formulaire d'inscription/changement de mot de passe ne le rejette.
+AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization
@@ -211,3 +204,11 @@ OPERATEURS_MOBILE_MONEY = [
     ('mtn', 'MTN MoMo'),
     ('camtel', 'Camtel'),
 ]
+
+# --- Assistant IA d'analyse des ventes (Groq, reserve au plan qui inclut
+# "ia_analyse_ventes") -------------------------------------------------------
+# Ne jamais committer la cle : fournie via variable d'environnement.
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b')
+# Sans cle : reponses simulees (mode demonstration, aucun appel reseau).
+GROQ_MOCK = os.environ.get('GROQ_MOCK', '') == '1' or not GROQ_API_KEY

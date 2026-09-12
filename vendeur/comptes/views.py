@@ -45,7 +45,15 @@ def _rediriger_vers_etape(user):
 # ---------------------------------------------------------------------------
 def inscription(request):
     if request.user.is_authenticated:
-        return redirect("comptes_vendeur:tableau_de_bord")
+        if request.user.role == request.user.Role.VENDEUR:
+            return redirect("comptes_vendeur:tableau_de_bord")
+        # Deja connecte, mais avec un autre type de compte (acheteur, admin...) :
+        # rediriger vers le tableau de bord vendeur declencherait un 403
+        # (page presque vide) au lieu du formulaire attendu. On affiche une
+        # page claire et actionnable plutot qu'un simple message discret.
+        return render(request, "vendeur/auth/deja_connecte.html", {
+            "cible": "vendeur",
+        })
 
     form = InscriptionVendeurForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -61,6 +69,13 @@ class Connexion(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
+        # `dispatch()` (utilisateur deja connecte) et `form_valid()` (connexion
+        # qui vient de reussir) passent tous les deux par cette methode. Si le
+        # role n'est pas vendeur, renvoyer vers le tableau de bord vendeur
+        # declencherait un 403 (page presque vide) : on renvoie vers la page
+        # d'inscription, qui affiche alors une explication claire.
+        if self.request.user.role != self.request.user.Role.VENDEUR:
+            return reverse_lazy("comptes_vendeur:inscription")
         return reverse_lazy("comptes_vendeur:tableau_de_bord")
 
 
