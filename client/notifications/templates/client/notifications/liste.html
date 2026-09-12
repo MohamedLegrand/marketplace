@@ -1,0 +1,34 @@
+{% extends "client/dashboard_base.html" %}
+{% block titre %}Notifications{% endblock %}
+{% block entete %}Notifications{% endblock %}
+
+{% block contenu %}
+<h1 class="text-2xl font-semibold text-ink mb-5">Notifications</h1>
+
+{% if notifications %}
+  <div class="bg-surface border border-line rounded-xl divide-y divide-line">
+    {% for n in notifications %}
+      <a href="{% url 'notifications_client:suivre' n.pk %}" class="block p-4 hover:bg-soft {% if not n.lu %}bg-brand/5{% endif %}">
+        <div class="flex items-start gap-3">
+          <span class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="ico" style="width:15px;height:15px"><use href="#i-check-circle"/></svg>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-ink flex items-center gap-2">
+              {{ n.titre }}
+              {% if not n.lu %}<span class="w-2 h-2 rounded-full bg-brand shrink-0"></span>{% endif %}
+            </p>
+            <p class="text-sm text-muted mt-0.5">{{ n.message }}</p>
+            <p class="text-xs text-muted mt-1">{{ n.date_creation|date:"d/m/Y H:i" }}</p>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-check-circle"/></svg>
+    <p class="text-muted mt-3">Aucune notification pour l'instant.</p>
+  </div>
+{% endif %}
+{% endblock %}

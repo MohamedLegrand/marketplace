@@ -89,12 +89,39 @@ class DossierKYCAdmin(admin.ModelAdmin):
         return "-"
 
     # --- actions ---------------------------------------------------------
+    def _dossiers_avec_apercu(self, queryset):
+        """Prepare, pour chaque dossier, les apercus des documents soumis
+        (images + lien RCCM) afin que l'administrateur les examine avant de
+        prendre une decision (validation ou rejet)."""
+        resultat = []
+        for dossier in queryset:
+            resultat.append({
+                "dossier": dossier,
+                "apercu_recto": self._image(dossier.piece_recto),
+                "apercu_verso": self._image(dossier.piece_verso),
+                "apercu_selfie": self._image(dossier.selfie),
+                "lien_rccm": self.lien_rccm(dossier),
+            })
+        return resultat
+
     @admin.action(description="Valider les dossiers selectionnes")
     def valider_dossiers(self, request, queryset):
         cibles = queryset.exclude(statut=DossierKYC.Statut.VALIDE)
-        for dossier in cibles:
-            dossier.valider(request.user)
-        self.message_user(request, f"{cibles.count()} dossier(s) KYC valide(s).")
+        if request.POST.get("confirmer"):
+            for dossier in cibles:
+                dossier.valider(request.user)
+            self.message_user(request, f"{cibles.count()} dossier(s) KYC valide(s).")
+            return None
+
+        contexte = {
+            **self.admin_site.each_context(request),
+            "titre": "Confirmer la validation des dossiers KYC",
+            "dossiers": self._dossiers_avec_apercu(cibles),
+            "action": "valider_dossiers",
+            "selection": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            "opts": self.model._meta,
+        }
+        return render(request, "admin/kyc/action_valider.html", contexte)
 
     @admin.action(description="Rejeter les dossiers selectionnes (avec motif)")
     def rejeter_dossiers(self, request, queryset):
@@ -111,7 +138,7 @@ class DossierKYCAdmin(admin.ModelAdmin):
         contexte = {
             **self.admin_site.each_context(request),
             "titre": "Confirmer le rejet des dossiers KYC",
-            "dossiers": queryset,
+            "dossiers": self._dossiers_avec_apercu(queryset),
             "action": "rejeter_dossiers",
             "selection": request.POST.getlist(ACTION_CHECKBOX_NAME),
             "opts": self.model._meta,

@@ -33,6 +33,7 @@ class InscriptionVendeurForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = User.Role.VENDEUR
+        user.username = User.generer_username(user.email)
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()

@@ -3,8 +3,8 @@
 {% block entete %}{{ boutique.nom }}{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'boutiques_vendeur:liste' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
-  <svg class="ico"><use href="#i-back"/></svg> Mes boutiques
+<a href="{% if est_proprietaire %}{% url 'boutiques_vendeur:liste' %}{% else %}{% url 'comptes_vendeur:tableau_de_bord' %}{% endif %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {% if est_proprietaire %}Mes boutiques{% else %}Tableau de bord{% endif %}
 </a>
 
 <div class="flex items-center justify-between mt-3 mb-4">
@@ -15,20 +15,22 @@
 <div class="flex flex-wrap gap-1 border-b border-line mb-5 text-sm">
   <a href="{% url 'produits_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-package"/></svg> Produits</a>
   <a href="{% url 'commandes_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-bag"/></svg> Commandes</a>
+  {% if permissions.statistiques %}
+  <a href="{% url 'caisse_vendeur:rapport' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-card"/></svg> Caisse</a>
+  {% endif %}
   <a href="{% url 'boutiques_vendeur:avis' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-star"/></svg> Avis</a>
+  {% if est_proprietaire %}
   <a href="{% url 'roles_vendeur:liste' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-users"/></svg> Équipe</a>
+  {% endif %}
+  {% if permissions.statistiques %}
   <a href="{% url 'assistant_vendeur:chat' boutique.pk %}" class="flex items-center gap-2 px-3 py-2 text-muted hover:text-fg"><svg class="ico"><use href="#i-sparkle"/></svg> Assistant IA</a>
+  {% endif %}
 </div>
 
-{% if boutique.statut == "rejetee" and boutique.motif_rejet %}
+{% if boutique.statut == "rejetee" %}
   <div class="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 mb-4 text-sm">
     <svg class="ico mt-0.5 shrink-0"><use href="#i-alert"/></svg>
-    <div><span class="font-semibold">Dossier refusé.</span> Motif : {{ boutique.motif_rejet }}<br>Corrigez les informations puis re-soumettez.</div>
-  </div>
-{% elif boutique.statut == "en_attente" %}
-  <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 mb-4 text-sm">
-    <svg class="ico mt-0.5 shrink-0"><use href="#i-clock"/></svg>
-    <div>En attente de validation par l'administrateur (soumise le {{ boutique.date_soumission|date:"d/m/Y" }}).</div>
+    <div><span class="font-semibold">Boutique désactivée par l'administrateur.</span>{% if boutique.motif_rejet %} Motif : {{ boutique.motif_rejet }}{% endif %} Corrigez les informations si besoin ; contactez l'administrateur pour la réactiver.</div>
   </div>
 {% elif boutique.statut == "suspendue" %}
   <div class="flex items-start gap-2.5 rounded-lg border border-orange-200 bg-orange-50 text-orange-800 px-4 py-3 mb-4 text-sm">
@@ -66,10 +68,12 @@
             <td class="text-fg">{{ z.tarif }} XAF</td>
             <td class="text-fg">{{ z.delai_estime|default:"—" }}</td>
             <td class="text-right whitespace-nowrap">
+              {% if est_proprietaire %}
               <a href="{% url 'boutiques_vendeur:zone_modifier' boutique.pk z.pk %}" class="text-brand">Modifier</a>
               <form method="post" action="{% url 'boutiques_vendeur:zone_supprimer' boutique.pk z.pk %}" class="inline ml-2">{% csrf_token %}
                 <button class="text-red-600 hover:text-red-700">Supprimer</button>
               </form>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
@@ -79,6 +83,7 @@
     <p class="text-sm text-muted mb-4">Aucune zone définie. Ajoutez au moins une zone couverte.</p>
   {% endif %}
 
+  {% if est_proprietaire %}
   <form method="post" action="{% url 'boutiques_vendeur:zone_creer' boutique.pk %}" class="form-v flex flex-wrap items-end gap-3">
     {% csrf_token %}
     <div class="w-full sm:w-40"><label>Zone</label>{{ zone_form.nom }}</div>
@@ -88,14 +93,7 @@
       <svg class="ico"><use href="#i-plus"/></svg> Ajouter
     </button>
   </form>
+  {% endif %}
 </div>
 
-{% if soumettable %}
-  <form method="post" action="{% url 'boutiques_vendeur:soumettre' boutique.pk %}">
-    {% csrf_token %}
-    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg py-2.5 text-sm">
-      <svg class="ico"><use href="#i-check"/></svg> Soumettre à validation
-    </button>
-  </form>
-{% endif %}
 {% endblock %}

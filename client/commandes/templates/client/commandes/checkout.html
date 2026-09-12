@@ -1,5 +1,6 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Valider ma commande{% endblock %}
+{% block entete %}Validation de la commande{% endblock %}
 
 {% block contenu %}
 <h1 class="text-2xl font-semibold text-ink mb-1">Validation de la commande</h1>
@@ -22,16 +23,23 @@
     {% csrf_token %}
     <div>
       <h2 class="font-semibold text-ink mb-2 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-pin"/></svg> Adresse de livraison</h2>
-      {% if adresses %}
-        {% for a in adresses %}
-          <label class="flex items-start gap-2 text-sm py-1 text-fg">
-            <input type="radio" name="adresse" value="{{ a.pk }}" class="mt-1" {% if a.par_defaut %}checked{% endif %}>
-            <span>{{ a.libelle }} — {{ a.nom_destinataire }}, {{ a.ville }}{% if a.quartier %}, {{ a.quartier }}{% endif %}</span>
-          </label>
-        {% endfor %}
-      {% else %}
-        <p class="text-sm text-muted">Aucune adresse. <a href="{% url 'comptes_client:adresse_creer' %}" class="text-brand">En ajouter une</a>.</p>
-      {% endif %}
+
+      {% for a in adresses %}
+        <label class="adr-choix flex items-start gap-2 text-sm py-1.5 text-fg cursor-pointer">
+          <input type="radio" name="adresse" value="{{ a.pk }}" class="adr-radio mt-1" {% if a.par_defaut %}checked{% endif %}>
+          <span>{{ a.libelle }} — {{ a.nom_destinataire }}, {{ a.ville }}{% if a.quartier %}, {{ a.quartier }}{% endif %}</span>
+        </label>
+      {% endfor %}
+
+      <label class="adr-choix flex items-start gap-2 text-sm py-1.5 text-fg cursor-pointer">
+        <input type="radio" name="adresse" value="{{ nouvelle_adresse }}" class="adr-radio mt-1" id="radio-nouvelle-adresse" {% if not adresses %}checked{% endif %}>
+        <span class="flex items-center gap-1.5"><svg class="ico" style="width:14px;height:14px"><use href="#i-plus"/></svg> Nouvelle adresse de livraison</span>
+      </label>
+
+      <div id="bloc-nouvelle-adresse" class="form-c form-grid mt-2 pl-3 border-l-2 border-line {% if adresses %}hidden{% endif %}">
+        {{ formulaire_adresse.non_field_errors }}
+        {{ formulaire_adresse.as_p }}
+      </div>
     </div>
 
     {% if zones %}
@@ -53,9 +61,21 @@
       <div class="flex justify-between text-muted"><span>Livraison</span><span>selon la zone</span></div>
     </div>
 
-    {% if adresses %}
-      <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Valider la commande</button>
-    {% endif %}
+    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Valider la commande</button>
   </form>
 </div>
+
+<script>
+  (function () {
+    var radios = document.querySelectorAll('.adr-radio');
+    var bloc = document.getElementById('bloc-nouvelle-adresse');
+    var radioNouvelle = document.getElementById('radio-nouvelle-adresse');
+    if (!bloc || !radioNouvelle) { return; }
+    function actualiser() {
+      bloc.classList.toggle('hidden', !radioNouvelle.checked);
+    }
+    radios.forEach(function (r) { r.addEventListener('change', actualiser); });
+    actualiser();
+  })();
+</script>
 {% endblock %}

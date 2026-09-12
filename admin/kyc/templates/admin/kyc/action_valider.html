@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<p>Vérifiez les documents soumis avant de <strong>valider</strong> le ou les dossiers KYC suivants :</p>
+
+{% for entree in dossiers %}
+  <div style="border:1px solid #e4e9f2;border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+    <p style="margin:0 0 8px;"><strong>{{ entree.dossier.vendeur }}</strong> — {{ entree.dossier.nom_complet }}
+      (statut actuel : {{ entree.dossier.get_statut_display }})</p>
+    <p style="margin:0 0 8px;color:#5f7492;font-size:.85em;">
+      {{ entree.dossier.get_type_piece_display }} n° {{ entree.dossier.numero_piece }}
+      {% if entree.dossier.date_naissance %} · né(e) le {{ entree.dossier.date_naissance|date:"d/m/Y" }}{% endif %}
+      {% if entree.dossier.raison_sociale %} · {{ entree.dossier.raison_sociale }}{% endif %}
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;">
+      <div><p style="margin:0 0 4px;font-size:.8em;color:#5f7492;">Pièce — recto</p>{{ entree.apercu_recto }}</div>
+      <div><p style="margin:0 0 4px;font-size:.8em;color:#5f7492;">Pièce — verso</p>{{ entree.apercu_verso }}</div>
+      <div><p style="margin:0 0 4px;font-size:.8em;color:#5f7492;">Selfie avec la pièce</p>{{ entree.apercu_selfie }}</div>
+    </div>
+    {% if entree.dossier.registre_commerce %}
+      <p style="margin:8px 0 0;">Registre de commerce : {{ entree.lien_rccm }}</p>
+    {% endif %}
+  </div>
+{% empty %}
+  <p>Aucun dossier a valider (deja valides).</p>
+{% endfor %}
+
+{% if dossiers %}
+<form method="post">
+  {% csrf_token %}
+  {% for id in selection %}
+    <input type="hidden" name="_selected_action" value="{{ id }}">
+  {% endfor %}
+  <input type="hidden" name="action" value="{{ action }}">
+  <input type="hidden" name="confirmer" value="1">
+
+  <p>
+    <input type="submit" value="Confirmer la validation" class="default">
+    <a href="{% url 'admin:kyc_dossierkyc_changelist' %}" class="button cancel-link">Annuler</a>
+  </p>
+</form>
+{% endif %}
+{% endblock %}

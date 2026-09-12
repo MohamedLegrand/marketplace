@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'vendeur.comptes',
     'vendeur.boutiques',
     'vendeur.roles',
+    'vendeur.caisse',
 
     # Catalogue produits
     'admin.produits',
@@ -73,6 +74,9 @@ INSTALLED_APPS = [
     # Assistant IA d'analyse des ventes (reserve au forfait qui l'inclut)
     'vendeur.assistant',
 
+    # Assistant IA d'analyse globale (espace administrateur, toutes boutiques)
+    'admin.assistant_ia',
+
     # Avis clients
     'admin.avis',
     'client.avis',
@@ -81,6 +85,7 @@ INSTALLED_APPS = [
     'client.comptes',
     'client.catalogue',
     'client.panier',
+    'client.notifications',
     'client.contact',
 ]
 
@@ -112,6 +117,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'client.panier.context.panier',
+                'client.notifications.context.notifications',
             ],
         },
     },
@@ -187,23 +193,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'account.User'
 
 
-# --- Agregateur de paiement HR-Skills Pay ---------------------------------
-# Ne jamais committer les cles : les fournir via variables d'environnement.
-HRSKILLS_BASE_URL = os.environ.get('HRSKILLS_BASE_URL', 'https://api.hrskills-pay.com')
-HRSKILLS_KEY_A = os.environ.get('HRSKILLS_KEY_A', '')          # hrsk_pk_live_... / hrsk_pk_test_...
-HRSKILLS_KEY_B = os.environ.get('HRSKILLS_KEY_B', '')          # hrsk_sk_... (jamais cote client)
-# Sans cle : mode simulation local (contrat sandbox : montant pair -> SUCCESS).
-HRSKILLS_MOCK = os.environ.get('HRSKILLS_MOCK', '') == '1' or not HRSKILLS_KEY_A
-# Confirmation des paiements par polling (GET /v1/payments/:ref) : bouton
-# "Verifier" cote utilisateur + commande de gestion "synchroniser_paiements".
-HRSKILLS_POLL_TIMEOUT_MIN = int(os.environ.get('HRSKILLS_POLL_TIMEOUT_MIN', '20'))
-
-# Operateurs Mobile Money disponibles au Cameroun.
-OPERATEURS_MOBILE_MONEY = [
-    ('orange', 'Orange Money'),
-    ('mtn', 'MTN MoMo'),
-    ('camtel', 'Camtel'),
-]
+# --- Paiements ------------------------------------------------------------
+# Plus d'agregateur externe (HR-Skills Pay) : les paiements (commande et
+# abonnement) sont simules cote application (admin.paiements.services) et
+# stockes comme transactions dans la table "paiement" pour l'historique.
 
 # --- Assistant IA d'analyse des ventes (Groq, reserve au plan qui inclut
 # "ia_analyse_ventes") -------------------------------------------------------

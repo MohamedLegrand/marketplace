@@ -5,11 +5,11 @@
 {% block contenu %}
 {% if etape and etape != "termine" %}{% include "vendeur/_stepper.html" %}{% endif %}
 
-<div class="bg-surface border border-line rounded-2xl p-6 max-w-lg">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-2xl">
   <h2 class="font-semibold text-ink mb-1">Vos informations</h2>
   <p class="text-sm text-muted mb-5">Elles nous permettent de vous identifier et de vous contacter.</p>
 
-  <form method="post" class="form-v">
+  <form method="post" class="form-v form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}

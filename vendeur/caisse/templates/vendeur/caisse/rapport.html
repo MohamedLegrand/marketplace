@@ -1,0 +1,78 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Caisse · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ boutique.nom }} · Caisse{% endblock %}
+
+{% block contenu %}
+<a href="{% url 'boutiques_vendeur:detail' boutique.pk %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+  <svg class="ico"><use href="#i-back"/></svg> {{ boutique.nom }}
+</a>
+
+<div class="flex flex-wrap items-center justify-between gap-3 mt-3 mb-5">
+  <h2 class="text-xl font-semibold text-ink">Caisse &amp; rapports</h2>
+  <div class="flex items-center gap-2">
+    <form method="get" class="flex items-center gap-2">
+      <select name="periode" onchange="this.form.submit()" class="text-sm border border-line rounded-lg py-1.5 px-2.5 bg-white text-ink">
+        {% for valeur, libelle in periodes %}
+          <option value="{{ valeur }}" {% if valeur == periode %}selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <a href="{% url 'caisse_vendeur:rapport_pdf' boutique.pk %}?periode={{ periode }}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+      <svg class="ico"><use href="#i-package"/></svg> Télécharger le PDF
+    </a>
+  </div>
+</div>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Chiffre d'affaires livré</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ ca_livre }} <span class="text-sm text-muted font-normal">XAF</span></p>
+  </div>
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Commandes</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ nb_commandes }}</p>
+    <p class="text-xs text-muted mt-0.5">dont {{ nb_commandes_livrees }} livrée(s)</p>
+  </div>
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Unités vendues</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ qte_vendue }}</p>
+  </div>
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Unités réapprovisionnées</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ qte_reappro }}</p>
+  </div>
+</div>
+
+<div class="bg-surface border border-line rounded-xl p-5">
+  <h3 class="font-semibold text-ink mb-3">Mouvements de stock récents</h3>
+  {% if mouvements_affiches %}
+    <div class="overflow-x-auto"><table class="w-full min-w-[560px] text-sm">
+      <thead class="text-muted text-left"><tr>
+        <th class="py-1 font-medium">Date</th><th class="font-medium">Type</th><th class="font-medium">Produit</th>
+        <th class="font-medium">Qté</th><th class="font-medium">Montant</th><th class="font-medium">Auteur</th>
+      </tr></thead>
+      <tbody>
+        {% for m in mouvements_affiches %}
+          <tr class="border-t border-line">
+            <td class="py-2 text-fg whitespace-nowrap">{{ m.date_creation|date:"d/m/Y H:i" }}</td>
+            <td class="text-fg">
+              {% if m.type_mouvement == "vente" %}<span class="text-red-600">Vente</span>
+              {% elif m.type_mouvement == "restock" %}<span class="text-emerald-700">Réappro.</span>
+              {% else %}<span class="text-muted">{{ m.get_type_mouvement_display }}</span>{% endif %}
+            </td>
+            <td class="text-fg">{{ m.produit.nom }}{% if m.variante %} <span class="text-xs text-muted">({{ m.variante.libelle }})</span>{% endif %}</td>
+            <td class="text-fg">{{ m.quantite }}</td>
+            <td class="text-fg">{% if m.montant %}{{ m.montant }} XAF{% else %}—{% endif %}</td>
+            <td class="text-fg">{% if m.auteur %}{{ m.auteur.get_full_name|default:m.auteur.email }}{% else %}—{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    {% if mouvements|length > mouvements_affiches|length %}
+      <p class="text-xs text-muted mt-3">Affichage des 50 mouvements les plus récents. Téléchargez le PDF pour l'historique complet de la période.</p>
+    {% endif %}
+  {% else %}
+    <p class="text-sm text-muted">Aucun mouvement de stock sur cette période.</p>
+  {% endif %}
+</div>
+{% endblock %}

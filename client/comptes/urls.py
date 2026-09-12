@@ -10,6 +10,7 @@ urlpatterns = [
     path("deconnexion/", views.Deconnexion.as_view(), name="deconnexion"),
     path("mot-de-passe/", views.ChangerMotDePasse.as_view(), name="mot_de_passe"),
     path("", views.tableau_de_bord, name="tableau_de_bord"),
+    path("boutiques/", views.boutiques, name="boutiques"),
     path("profil/", views.profil, name="profil"),
     path("adresses/", views.adresses, name="adresses"),
     path("adresses/ajouter/", views.adresse_creer, name="adresse_creer"),

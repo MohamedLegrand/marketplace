@@ -2,11 +2,11 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from admin.boutiques.models import Boutique
-from admin.produits.models import PhotoProduit, Produit, VarianteProduit
-from vendeur.comptes.decorators import onboarding_complete_required
+from admin.produits.models import MouvementStock, PhotoProduit, Produit, VarianteProduit
+from vendeur.comptes.decorators import acces_boutique_required
 
 from .forms import (
+    AjoutStockForm,
     PhotoProduitForm,
     ProduitForm,
     VarianteAjoutForm,
@@ -14,28 +14,37 @@ from .forms import (
 )
 
 
-def _boutique(request, boutique_pk):
-    return get_object_or_404(Boutique, pk=boutique_pk, proprietaire=request.user)
+def _produit(request, produit_pk):
+    return get_object_or_404(Produit, pk=produit_pk, boutique=request.boutique)
 
 
-def _produit(request, boutique_pk, produit_pk):
-    boutique = _boutique(request, boutique_pk)
-    produit = get_object_or_404(Produit, pk=produit_pk, boutique=boutique)
-    return boutique, produit
+def _permissions(request):
+    """Permissions de l'utilisateur courant sur la boutique de la requete
+    (tout est autorise au proprietaire)."""
+    role = request.role_boutique
+    if role is None:
+        return {"produits": True, "stock": True, "commandes": True, "statistiques": True}
+    return {
+        "produits": role.peut_gerer_produits,
+        "stock": role.peut_gerer_stock,
+        "commandes": role.peut_gerer_commandes,
+        "statistiques": role.peut_voir_statistiques,
+    }
 
 
-@onboarding_complete_required
+@acces_boutique_required()
 def liste(request, boutique_pk):
-    boutique = _boutique(request, boutique_pk)
+    boutique = request.boutique
     return render(request, "vendeur/produits/liste.html", {
         "boutique": boutique,
         "produits": boutique.produits.all(),
+        "permissions": _permissions(request),
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def creer(request, boutique_pk):
-    boutique = _boutique(request, boutique_pk)
+    boutique = request.boutique
     form = ProduitForm(request.POST or None, instance=Produit(boutique=boutique))
     if request.method == "POST" and form.is_valid():
         produit = form.save()
@@ -46,9 +55,10 @@ def creer(request, boutique_pk):
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def modifier(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     form = ProduitForm(request.POST or None, instance=produit)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -59,9 +69,11 @@ def modifier(request, boutique_pk, produit_pk):
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required()
 def detail(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
+    permissions = _permissions(request)
     return render(request, "vendeur/produits/detail.html", {
         "boutique": boutique,
         "produit": produit,
@@ -69,12 +81,16 @@ def detail(request, boutique_pk, produit_pk):
         "variantes": produit.variantes.all(),
         "photo_form": PhotoProduitForm(),
         "variante_form": VarianteAjoutForm(),
+        "stock_form": AjoutStockForm(),
+        "permissions": permissions,
+        "mouvements": produit.mouvements_stock.select_related("variante", "auteur")[:15],
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def basculer_actif(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     if request.method == "POST":
         produit.actif = not produit.actif
         produit.save(update_fields=["actif", "date_modification"])
@@ -82,9 +98,10 @@ def basculer_actif(request, boutique_pk, produit_pk):
     return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def supprimer(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     if request.method == "POST":
         produit.delete()
         messages.success(request, "Produit supprime.")
@@ -92,10 +109,42 @@ def supprimer(request, boutique_pk, produit_pk):
     return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
 
 
+# --- Stock ------------------------------------------------------------------
+@acces_boutique_required("stock")
+def stock_ajouter(request, boutique_pk, produit_pk):
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
+    if request.method == "POST":
+        form = AjoutStockForm(request.POST, produit=produit)
+        if form.is_valid():
+            quantite = form.cleaned_data["quantite"]
+            variante = form.cleaned_data["variante"]
+            note = form.cleaned_data["note"]
+            if variante:
+                variante.stock += quantite
+                variante.save(update_fields=["stock", "date_modification"])
+            else:
+                produit.stock += quantite
+                produit.save(update_fields=["stock", "date_modification"])
+            MouvementStock.objects.create(
+                produit=produit,
+                variante=variante,
+                type_mouvement=MouvementStock.Type.RESTOCK,
+                quantite=quantite,
+                auteur=request.user,
+                note=note,
+            )
+            messages.success(request, f"Stock mis a jour (+{quantite}).")
+        else:
+            messages.error(request, "Formulaire de reapprovisionnement invalide.")
+    return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
+
+
 # --- Photos ---------------------------------------------------------------
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def photo_ajouter(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     if request.method == "POST":
         form = PhotoProduitForm(request.POST, request.FILES)
         if form.is_valid():
@@ -108,9 +157,10 @@ def photo_ajouter(request, boutique_pk, produit_pk):
     return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def photo_principale(request, boutique_pk, produit_pk, photo_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     photo = get_object_or_404(PhotoProduit, pk=photo_pk, produit=produit)
     if request.method == "POST":
         photo.principale = True
@@ -119,9 +169,10 @@ def photo_principale(request, boutique_pk, produit_pk, photo_pk):
     return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def photo_supprimer(request, boutique_pk, produit_pk, photo_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     photo = get_object_or_404(PhotoProduit, pk=photo_pk, produit=produit)
     if request.method == "POST":
         photo.delete()
@@ -130,9 +181,10 @@ def photo_supprimer(request, boutique_pk, produit_pk, photo_pk):
 
 
 # --- Variantes ----------------------------------------------------------
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def variante_ajouter(request, boutique_pk, produit_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     if request.method == "POST":
         form = VarianteAjoutForm(request.POST)
         if form.is_valid():
@@ -149,9 +201,10 @@ def variante_ajouter(request, boutique_pk, produit_pk):
     return redirect("produits_vendeur:detail", boutique_pk=boutique.pk, produit_pk=produit.pk)
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def variante_modifier(request, boutique_pk, produit_pk, variante_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     variante = get_object_or_404(VarianteProduit, pk=variante_pk, produit=produit)
     form = VarianteProduitForm(request.POST or None, instance=variante)
     if request.method == "POST" and form.is_valid():
@@ -163,9 +216,10 @@ def variante_modifier(request, boutique_pk, produit_pk, variante_pk):
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required("produits")
 def variante_supprimer(request, boutique_pk, produit_pk, variante_pk):
-    boutique, produit = _produit(request, boutique_pk, produit_pk)
+    boutique = request.boutique
+    produit = _produit(request, produit_pk)
     variante = get_object_or_404(VarianteProduit, pk=variante_pk, produit=produit)
     if request.method == "POST":
         variante.delete()

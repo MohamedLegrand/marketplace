@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from admin.boutiques.models import Boutique
 from admin.produits.models import Produit
+from client.shell import base_shell
 
 from .panier import Panier, PanierAutreBoutique
 
@@ -16,6 +17,7 @@ def voir(request):
         "lignes": panier.lignes(),
         "total": panier.total(),
         "boutique": boutique,
+        "base_shell": base_shell(request),
     })
 
 

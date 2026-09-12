@@ -7,7 +7,7 @@
   <svg class="ico"><use href="#i-back"/></svg> Équipe
 </a>
 
-<div class="bg-surface border border-line rounded-2xl p-6 max-w-lg">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-2xl">
   <h2 class="text-lg font-semibold text-ink mb-2">
     {% if mode == "ajouter" %}Ajouter un membre à {{ boutique.nom }}{% else %}Modifier : {{ role.utilisateur.email }}{% endif %}
   </h2>
@@ -18,7 +18,7 @@
     </p>
   {% endif %}
 
-  <form method="post" class="form-v">
+  <form method="post" class="form-v form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
@@ -27,4 +27,29 @@
     </button>
   </form>
 </div>
+
+<script>
+  (function () {
+    var select = document.getElementById('id_type_role');
+    if (!select) { return; }
+    var DEFAUTS = {
+      gestionnaire: { produits: true, stock: true, commandes: true, statistiques: true },
+      vendeur: { produits: true, stock: true, commandes: true, statistiques: false },
+      caissier: { produits: false, stock: false, commandes: true, statistiques: true }
+    };
+    var champs = {
+      produits: document.getElementById('id_peut_gerer_produits'),
+      stock: document.getElementById('id_peut_gerer_stock'),
+      commandes: document.getElementById('id_peut_gerer_commandes'),
+      statistiques: document.getElementById('id_peut_voir_statistiques')
+    };
+    select.addEventListener('change', function () {
+      var defauts = DEFAUTS[select.value];
+      if (!defauts) { return; }
+      Object.keys(defauts).forEach(function (cle) {
+        if (champs[cle]) { champs[cle].checked = defauts[cle]; }
+      });
+    });
+  })();
+</script>
 {% endblock %}

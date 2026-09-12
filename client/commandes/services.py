@@ -2,7 +2,7 @@ from django.db import transaction
 
 from admin.boutiques.models import Boutique
 from admin.commandes.models import Commande, LigneCommande, SuiviCommande
-from admin.produits.models import Produit, VarianteProduit
+from admin.produits.models import MouvementStock, Produit, VarianteProduit
 
 
 class StockInsuffisant(Exception):
@@ -60,6 +60,14 @@ def creer_commande(client, panier, adresse, zone):
             designation=designation,
             prix_unitaire=prix,
             quantite=quantite,
+        )
+        MouvementStock.objects.create(
+            produit=produit,
+            variante=variante,
+            type_mouvement=MouvementStock.Type.VENTE,
+            quantite=quantite,
+            montant=prix * quantite,
+            commande=commande,
         )
         sous_total += prix * quantite
 

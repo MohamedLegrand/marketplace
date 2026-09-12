@@ -4,15 +4,35 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from admin.abonnements.services import peut_creer_boutique
 from admin.boutiques.models import Boutique, ZoneLivraison
-from vendeur.comptes.decorators import onboarding_complete_required
+from vendeur.comptes.decorators import acces_boutique_required, onboarding_complete_required
 
 from .forms import BoutiqueForm, ZoneLivraisonForm
 
-_STATUTS_MODIFIABLES = (Boutique.Statut.BROUILLON, Boutique.Statut.REJETEE)
+# La boutique est active des sa creation (aucune validation par l'admin) :
+# le vendeur peut toujours modifier ses informations, sauf si elle a fait
+# l'objet d'une sanction (suspension ou bannissement).
+_STATUTS_MODIFIABLES = (
+    Boutique.Statut.BROUILLON,
+    Boutique.Statut.EN_ATTENTE,
+    Boutique.Statut.APPROUVEE,
+    Boutique.Statut.REJETEE,
+)
 
 
-def _boutique_du_vendeur(request, pk):
-    return get_object_or_404(Boutique, pk=pk, proprietaire=request.user)
+def _boutique_du_vendeur(request, boutique_pk):
+    return get_object_or_404(Boutique, pk=boutique_pk, proprietaire=request.user)
+
+
+def _permissions(request):
+    role = request.role_boutique
+    if role is None:
+        return {"produits": True, "stock": True, "commandes": True, "statistiques": True}
+    return {
+        "produits": role.peut_gerer_produits,
+        "stock": role.peut_gerer_stock,
+        "commandes": role.peut_gerer_commandes,
+        "statistiques": role.peut_voir_statistiques,
+    }
 
 
 @onboarding_complete_required
@@ -39,15 +59,19 @@ def creer(request):
         instance=Boutique(proprietaire=request.user),
     )
     if request.method == "POST" and form.is_valid():
-        boutique = form.save()
-        messages.success(request, "Boutique creee en brouillon. Completez-la puis soumettez-la a validation.")
-        return redirect("boutiques_vendeur:detail", pk=boutique.pk)
+        boutique = form.save(commit=False)
+        # Pas de validation par l'administrateur : la boutique est active des
+        # sa creation (le KYC du vendeur a deja ete verifie en amont).
+        boutique.statut = Boutique.Statut.APPROUVEE
+        boutique.save()
+        messages.success(request, "Boutique creee et publiee.")
+        return redirect("boutiques_vendeur:detail", boutique_pk=boutique.pk)
     return render(request, "vendeur/boutiques/form.html", {"form": form, "mode": "creer"})
 
 
-@onboarding_complete_required
-def avis(request, pk):
-    boutique = _boutique_du_vendeur(request, pk)
+@acces_boutique_required()
+def avis(request, boutique_pk):
+    boutique = request.boutique
     from admin.avis.models import Avis
 
     return render(request, "vendeur/boutiques/avis.html", {
@@ -57,59 +81,36 @@ def avis(request, pk):
     })
 
 
-@onboarding_complete_required
-def detail(request, pk):
-    boutique = _boutique_du_vendeur(request, pk)
+@acces_boutique_required()
+def detail(request, boutique_pk):
+    boutique = request.boutique
     return render(request, "vendeur/boutiques/detail.html", {
         "boutique": boutique,
         "zones": boutique.zones_livraison.all(),
         "zone_form": ZoneLivraisonForm(),
-        "modifiable": boutique.statut in _STATUTS_MODIFIABLES,
-        "soumettable": boutique.statut in _STATUTS_MODIFIABLES,
+        "modifiable": request.est_proprietaire_boutique and boutique.statut in _STATUTS_MODIFIABLES,
+        "est_proprietaire": request.est_proprietaire_boutique,
+        "permissions": _permissions(request),
     })
 
 
 @onboarding_complete_required
-def modifier(request, pk):
-    boutique = _boutique_du_vendeur(request, pk)
+def modifier(request, boutique_pk):
+    boutique = _boutique_du_vendeur(request, boutique_pk)
     form = BoutiqueForm(request.POST or None, request.FILES or None, instance=boutique)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Boutique mise a jour.")
-        return redirect("boutiques_vendeur:detail", pk=boutique.pk)
+        return redirect("boutiques_vendeur:detail", boutique_pk=boutique.pk)
     return render(request, "vendeur/boutiques/form.html", {
         "form": form, "mode": "modifier", "boutique": boutique,
     })
 
 
-@onboarding_complete_required
-def soumettre(request, pk):
-    boutique = _boutique_du_vendeur(request, pk)
-    if request.method != "POST":
-        return redirect("boutiques_vendeur:detail", pk=pk)
-    if boutique.statut not in _STATUTS_MODIFIABLES:
-        messages.error(request, "Cette boutique ne peut pas etre soumise dans son etat actuel.")
-        return redirect("boutiques_vendeur:detail", pk=pk)
-    manquants = [
-        libelle
-        for champ, libelle in (("nom", "nom"), ("description", "description"),
-                               ("categorie", "categorie"), ("telephone", "telephone"),
-                               ("email", "e-mail"), ("ville", "ville"))
-        if not getattr(boutique, champ)
-    ]
-    if manquants:
-        messages.error(request, "Completez d'abord : " + ", ".join(manquants) + ".")
-        return redirect("boutiques_vendeur:detail", pk=pk)
-
-    boutique.soumettre()
-    messages.success(request, "Boutique soumise a validation.")
-    return redirect("boutiques_vendeur:detail", pk=pk)
-
-
 # --- Zones de livraison -----------------------------------------------------
 @onboarding_complete_required
-def zone_creer(request, pk):
-    boutique = _boutique_du_vendeur(request, pk)
+def zone_creer(request, boutique_pk):
+    boutique = _boutique_du_vendeur(request, boutique_pk)
     if request.method == "POST":
         form = ZoneLivraisonForm(request.POST)
         if form.is_valid():
@@ -123,28 +124,28 @@ def zone_creer(request, pk):
                 messages.error(request, "Une zone porte deja ce nom pour cette boutique.")
         else:
             messages.error(request, "Formulaire de zone invalide.")
-    return redirect("boutiques_vendeur:detail", pk=pk)
+    return redirect("boutiques_vendeur:detail", boutique_pk=boutique_pk)
 
 
 @onboarding_complete_required
-def zone_modifier(request, pk, zone_pk):
-    boutique = _boutique_du_vendeur(request, pk)
+def zone_modifier(request, boutique_pk, zone_pk):
+    boutique = _boutique_du_vendeur(request, boutique_pk)
     zone = get_object_or_404(ZoneLivraison, pk=zone_pk, boutique=boutique)
     form = ZoneLivraisonForm(request.POST or None, instance=zone)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Zone mise a jour.")
-        return redirect("boutiques_vendeur:detail", pk=pk)
+        return redirect("boutiques_vendeur:detail", boutique_pk=boutique_pk)
     return render(request, "vendeur/boutiques/zone_form.html", {
         "form": form, "boutique": boutique, "zone": zone,
     })
 
 
 @onboarding_complete_required
-def zone_supprimer(request, pk, zone_pk):
-    boutique = _boutique_du_vendeur(request, pk)
+def zone_supprimer(request, boutique_pk, zone_pk):
+    boutique = _boutique_du_vendeur(request, boutique_pk)
     zone = get_object_or_404(ZoneLivraison, pk=zone_pk, boutique=boutique)
     if request.method == "POST":
         zone.delete()
         messages.success(request, "Zone supprimee.")
-    return redirect("boutiques_vendeur:detail", pk=pk)
+    return redirect("boutiques_vendeur:detail", boutique_pk=boutique_pk)

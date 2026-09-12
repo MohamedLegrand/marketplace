@@ -1,8 +1,9 @@
-{% extends "client/base.html" %}
-{% block titre %}{{ boutique.nom }} · Marketplace{% endblock %}
+{% extends base_shell %}
+{% block titre %}{{ boutique.nom }} · Jennifer Website{% endblock %}
+{% block entete %}{{ boutique.nom }}{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+<a href="{% if user.is_authenticated and user.role == 'acheteur' %}{% url 'comptes_client:boutiques' %}{% else %}{% url 'catalogue:accueil' %}{% endif %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
   <svg class="ico"><use href="#i-back"/></svg> Toutes les boutiques
 </a>
 
@@ -32,17 +33,38 @@
 {% if produits %}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for p in produits %}
-      <a href="{% url 'catalogue:produit' boutique.slug p.slug %}" class="bg-surface border border-line rounded-xl overflow-hidden hover:border-brand/50">
-        <div class="aspect-square bg-slate-100 flex items-center justify-center text-muted">
-          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
-        </div>
-        <div class="p-3">
-          <p class="font-medium text-ink truncate">{{ p.nom }}</p>
-          <p class="text-sm text-brand font-semibold">{{ p.prix }} XAF</p>
+      <div class="bg-surface border border-line rounded-xl overflow-hidden hover:border-brand/50 transition-colors flex flex-col">
+        <a href="{% url 'catalogue:produit' boutique.slug p.slug %}" class="aspect-square bg-slate-100 flex items-center justify-center text-muted">
+          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-contain">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
+        </a>
+        <div class="p-3 flex flex-col flex-1">
+          <a href="{% url 'catalogue:produit' boutique.slug p.slug %}" class="font-medium text-ink truncate hover:text-brand">{{ p.nom }}</a>
           {% if p.nombre_avis %}<div class="mt-1">{% include "client/catalogue/_etoiles.html" with note=p.note_moyenne nb=p.nombre_avis %}</div>{% endif %}
           {% if p.stock_total <= 0 %}<p class="text-xs text-red-600 mt-1">Rupture de stock</p>{% endif %}
+          <div class="mt-auto pt-2.5">
+            <span class="text-brand font-semibold">{{ p.prix }} XAF</span>
+            <div class="mt-2 flex items-center gap-2">
+              {% if not p.a_variantes and p.stock_total > 0 %}
+                <form method="post" action="{% url 'panier:ajouter' %}" class="flex-1 min-w-0">
+                  {% csrf_token %}
+                  <input type="hidden" name="produit" value="{{ p.pk }}">
+                  <input type="hidden" name="quantite" value="1">
+                  <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg py-2 px-2.5">
+                    <svg class="ico" style="width:13px;height:13px"><use href="#i-cart"/></svg> Ajouter
+                  </button>
+                </form>
+                <a href="{% url 'catalogue:produit' boutique.slug p.slug %}" class="shrink-0 inline-flex items-center justify-center gap-1 text-xs font-semibold bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-2 px-2.5 whitespace-nowrap">
+                  Détails
+                </a>
+              {% else %}
+                <a href="{% url 'catalogue:produit' boutique.slug p.slug %}" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-soft hover:bg-slate-100 border border-line text-ink text-xs font-semibold rounded-lg py-2 px-2.5">
+                  Voir les détails <svg class="ico" style="width:12px;height:12px"><use href="#i-arrow"/></svg>
+                </a>
+              {% endif %}
+            </div>
+          </div>
         </div>
-      </a>
+      </div>
     {% endfor %}
   </div>
 {% else %}

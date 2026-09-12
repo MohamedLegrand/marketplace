@@ -1,6 +1,17 @@
 {% extends "client/base.html" %}
-{% block titre %}Marketplace — vendez et achetez en ligne au Cameroun{% endblock %}
+{% block titre %}Jennifer Website — vendez et achetez en ligne au Cameroun{% endblock %}
 {% block main_wrap %}{% endblock %}
+{% block panier_desktop %}{% endblock %}
+{% block panier_mobile %}{% endblock %}
+{% block lien_boutiques_desktop %}
+<a href="{{ lien_boutiques }}" class="text-fg hover:text-brand">Boutiques</a>
+{% endblock %}
+{% block lien_boutiques_mobile %}
+<a href="{{ lien_boutiques }}" class="py-2.5 text-fg">Boutiques</a>
+{% endblock %}
+{% block lien_boutiques_footer %}
+<a href="{{ lien_boutiques }}" class="hover:text-brand">Parcourir les boutiques</a>
+{% endblock %}
 
 {% block contenu %}
 {# ---------- Hero ---------- #}
@@ -17,7 +28,7 @@
       et où les acheteurs paient en toute sécurité par Mobile Money.
     </p>
     <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
-      <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-3 px-6">
+      <a href="{{ lien_boutiques }}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-3 px-6">
         <svg class="ico"><use href="#i-search"/></svg> Parcourir les boutiques
       </a>
       <a href="{% url 'comptes_vendeur:inscription' %}" class="inline-flex items-center gap-2 border border-line hover:border-brand/60 text-fg font-semibold rounded-lg py-3 px-6">
@@ -81,7 +92,7 @@
   <div class="max-w-3xl mx-auto px-4 py-16 text-center">
     <h2 class="text-xl font-semibold text-ink">À propos</h2>
     <p class="text-muted mt-3">
-      Marketplace est une place de marché en ligne dédiée au Cameroun : ouvrir une boutique
+      Jennifer Website est une place de marché en ligne dédiée au Cameroun : ouvrir une boutique
       en quelques minutes, vendre partout dans le pays, payer par Mobile Money en toute
       sécurité. Vérification des vendeurs, avis modérés, livraison locale.
     </p>
@@ -119,7 +130,7 @@
   <div class="max-w-5xl mx-auto px-4 py-16">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl font-semibold text-ink">Quelques boutiques</h2>
-      <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium">Toutes les boutiques <svg class="ico"><use href="#i-arrow"/></svg></a>
+      <a href="{{ lien_boutiques }}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium">Toutes les boutiques <svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {% for b in boutiques %}

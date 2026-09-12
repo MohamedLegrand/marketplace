@@ -1,8 +1,54 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Mon compte{% endblock %}
+{% block entete %}Vue d'ensemble{% endblock %}
 
 {% block contenu %}
-<h1 class="text-2xl font-semibold text-ink mb-6">Mon compte</h1>
+<h1 class="text-2xl font-semibold text-ink mb-4">Bonjour {{ user.first_name|default:user.email }}</h1>
+
+<div class="grid sm:grid-cols-3 gap-3 mb-5">
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Commandes</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ nb_commandes }}</p>
+  </div>
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">En cours</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ nb_en_cours }}</p>
+  </div>
+  <div class="bg-surface border border-line rounded-xl p-4">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Total acheté (livré)</p>
+    <p class="text-2xl font-semibold text-ink mt-1">{{ total_achete }} <span class="text-sm font-normal text-muted">XAF</span></p>
+  </div>
+</div>
+
+<div class="bg-surface border border-line rounded-xl p-5 mb-5">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-ink flex items-center gap-2"><svg class="ico text-muted"><use href="#i-receipt"/></svg> Commandes récentes</h2>
+    <a href="{% url 'commandes_client:liste' %}" class="text-sm text-brand font-medium">Tout voir</a>
+  </div>
+  {% if dernieres_commandes %}
+    <div class="space-y-2">
+      {% for c in dernieres_commandes %}
+        <a href="{% url 'commandes_client:detail' c.reference %}" class="flex items-center justify-between gap-3 rounded-lg hover:bg-soft px-2 py-2 -mx-2">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-ink truncate">{{ c.reference }} · {{ c.boutique.nom }}</p>
+            <p class="text-xs text-muted">{{ c.date_creation|date:"d/m/Y" }} · {{ c.nb_articles }} article(s)</p>
+          </div>
+          <div class="text-right shrink-0">
+            {% include "client/commandes/_statut.html" with statut=c.statut libelle=c.get_statut_display %}
+            <p class="text-sm font-semibold text-ink mt-1">{{ c.total }} XAF</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-6">
+      <p class="text-sm text-muted mb-3">Aucune commande pour l'instant.</p>
+      <a href="{% url 'comptes_client:boutiques' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+        <svg class="ico"><use href="#i-store"/></svg> Voir les boutiques
+      </a>
+    </div>
+  {% endif %}
+</div>
 
 <div class="grid sm:grid-cols-2 gap-4">
   <div class="bg-surface border border-line rounded-xl p-5">
@@ -25,17 +71,6 @@
       <p class="text-sm text-muted mt-2">Aucune adresse enregistrée.</p>
     {% endif %}
     <a href="{% url 'comptes_client:adresses' %}" class="inline-flex items-center gap-1.5 mt-3 text-sm text-brand font-medium">Gérer mes adresses <svg class="ico"><use href="#i-arrow"/></svg></a>
-  </div>
-</div>
-
-<div class="grid sm:grid-cols-2 gap-4 mt-4">
-  <div class="bg-surface border border-line rounded-xl p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold flex items-center gap-2"><svg class="ico"><use href="#i-receipt"/></svg> Commandes</p>
-    <a href="{% url 'commandes_client:liste' %}" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand font-medium">Historique de mes commandes <svg class="ico"><use href="#i-arrow"/></svg></a>
-  </div>
-  <div class="bg-surface border border-line rounded-xl p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold flex items-center gap-2"><svg class="ico"><use href="#i-star"/></svg> Avis</p>
-    <a href="{% url 'avis_client:mes_avis' %}" class="inline-flex items-center gap-1.5 mt-2 text-sm text-brand font-medium">Mes avis <svg class="ico"><use href="#i-arrow"/></svg></a>
   </div>
 </div>
 {% endblock %}

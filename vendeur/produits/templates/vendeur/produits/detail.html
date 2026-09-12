@@ -9,12 +9,14 @@
 
 <div class="flex items-center justify-between mt-3 mb-4">
   <h2 class="text-xl font-semibold text-ink">{{ produit.nom }}</h2>
+  {% if permissions.produits %}
   <div class="flex items-center gap-3">
     <a href="{% url 'produits_vendeur:modifier' boutique.pk produit.pk %}" class="inline-flex items-center gap-1.5 text-sm text-brand font-medium"><svg class="ico"><use href="#i-edit"/></svg> Modifier</a>
     <form method="post" action="{% url 'produits_vendeur:basculer' boutique.pk produit.pk %}" class="inline">{% csrf_token %}
       <button class="text-sm text-muted hover:text-fg">{% if produit.actif %}Retirer de la vente{% else %}Mettre en vente{% endif %}</button>
     </form>
   </div>
+  {% endif %}
 </div>
 
 {% if produit.masque_par_admin %}
@@ -36,32 +38,76 @@
 </div>
 
 <div class="bg-surface border border-line rounded-xl p-5 mb-4">
+  <h3 class="font-semibold text-ink mb-3 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-truck"/></svg> Stock</h3>
+  {% if permissions.stock %}
+    <form method="post" action="{% url 'produits_vendeur:stock_ajouter' boutique.pk produit.pk %}" class="form-v flex flex-wrap items-end gap-3 mb-4">
+      {% csrf_token %}
+      {% if variantes %}
+        <div class="w-full sm:w-48"><label>Variante (optionnel)</label>{{ stock_form.variante }}</div>
+      {% endif %}
+      <div class="w-full sm:w-32"><label>Quantité à ajouter</label>{{ stock_form.quantite }}</div>
+      <div class="w-full sm:w-56"><label>Note (optionnel)</label>{{ stock_form.note }}</div>
+      <button type="submit" class="inline-flex items-center gap-2 bg-soft hover:bg-slate-100 border border-line text-ink text-sm font-semibold rounded-lg py-2 px-4">
+        <svg class="ico"><use href="#i-plus"/></svg> Réapprovisionner
+      </button>
+    </form>
+  {% endif %}
+  {% if mouvements %}
+    <div class="overflow-x-auto"><table class="w-full min-w-[480px] text-sm">
+      <thead class="text-muted text-left"><tr><th class="py-1 font-medium">Date</th><th class="font-medium">Type</th><th class="font-medium">Quantité</th><th class="font-medium">Montant</th><th class="font-medium">Auteur</th></tr></thead>
+      <tbody>
+        {% for m in mouvements %}
+          <tr class="border-t border-line">
+            <td class="py-2 text-fg whitespace-nowrap">{{ m.date_creation|date:"d/m/Y H:i" }}</td>
+            <td class="text-fg">
+              {% if m.type_mouvement == "vente" %}<span class="text-red-600">Vente (-{{ m.quantite }})</span>
+              {% elif m.type_mouvement == "restock" %}<span class="text-emerald-700">Réappro. (+{{ m.quantite }})</span>
+              {% else %}<span class="text-muted">{{ m.get_type_mouvement_display }} (+{{ m.quantite }})</span>{% endif %}
+              {% if m.variante %}<span class="text-xs text-muted">· {{ m.variante.libelle }}</span>{% endif %}
+            </td>
+            <td class="text-fg">{{ m.quantite }}</td>
+            <td class="text-fg">{% if m.montant %}{{ m.montant }} XAF{% else %}—{% endif %}</td>
+            <td class="text-fg">{% if m.auteur %}{{ m.auteur.get_full_name|default:m.auteur.email }}{% else %}—{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  {% else %}
+    <p class="text-sm text-muted">Aucun mouvement de stock pour l'instant.</p>
+  {% endif %}
+</div>
+
+<div class="bg-surface border border-line rounded-xl p-5 mb-4">
   <h3 class="font-semibold text-ink mb-3 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-image"/></svg> Photos</h3>
   {% if photos %}
     <div class="flex flex-wrap gap-3 mb-4">
       {% for ph in photos %}
         <div class="w-24">
-          <div class="w-24 h-24 rounded-lg overflow-hidden border {% if ph.principale %}border-brand{% else %}border-line{% endif %}">
-            <img src="{{ ph.image.url }}" class="w-full h-full object-cover">
+          <div class="w-24 h-24 rounded-lg overflow-hidden bg-soft border {% if ph.principale %}border-brand{% else %}border-line{% endif %} flex items-center justify-center">
+            <img src="{{ ph.image.url }}" class="w-full h-full object-contain">
           </div>
+          {% if permissions.produits %}
           <div class="text-xs mt-1 flex justify-between items-center">
             {% if not ph.principale %}
               <form method="post" action="{% url 'produits_vendeur:photo_principale' boutique.pk produit.pk ph.pk %}">{% csrf_token %}<button class="text-brand">Principale</button></form>
             {% else %}<span class="text-brand">Principale</span>{% endif %}
             <form method="post" action="{% url 'produits_vendeur:photo_supprimer' boutique.pk produit.pk ph.pk %}">{% csrf_token %}<button class="text-red-600"><svg class="ico" style="width:13px;height:13px"><use href="#i-x"/></svg></button></form>
           </div>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
   {% else %}
     <p class="text-sm text-muted mb-4">Aucune photo.</p>
   {% endif %}
+  {% if permissions.produits %}
   <form method="post" enctype="multipart/form-data" action="{% url 'produits_vendeur:photo_ajouter' boutique.pk produit.pk %}" class="form-v flex flex-wrap items-end gap-3">
     {% csrf_token %}
     <div>{{ photo_form.image }}</div>
     <label class="flex items-center gap-1.5 text-sm text-fg normal-case font-normal tracking-normal">{{ photo_form.principale }} principale</label>
     <button type="submit" class="inline-flex items-center gap-2 bg-soft hover:bg-slate-100 border border-line text-ink text-sm font-semibold rounded-lg py-2 px-4"><svg class="ico"><use href="#i-plus"/></svg> Ajouter</button>
   </form>
+  {% endif %}
 </div>
 
 <div class="bg-surface border border-line rounded-xl p-5 mb-4">
@@ -77,8 +123,10 @@
             <td class="text-fg">{{ v.stock }}</td>
             <td class="text-fg">{% if v.actif %}active{% else %}<span class="text-muted">inactive</span>{% endif %}</td>
             <td class="text-right whitespace-nowrap">
+              {% if permissions.produits %}
               <a href="{% url 'produits_vendeur:variante_modifier' boutique.pk produit.pk v.pk %}" class="text-brand">Modifier</a>
               <form method="post" action="{% url 'produits_vendeur:variante_supprimer' boutique.pk produit.pk v.pk %}" class="inline ml-2">{% csrf_token %}<button class="text-red-600">Supprimer</button></form>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
@@ -87,6 +135,7 @@
   {% else %}
     <p class="text-sm text-muted mb-4">Aucune variante. Le stock du produit est utilisé tel quel.</p>
   {% endif %}
+  {% if permissions.produits %}
   <form method="post" action="{% url 'produits_vendeur:variante_ajouter' boutique.pk produit.pk %}" class="form-v flex flex-wrap items-end gap-3">
     {% csrf_token %}
     <div class="w-full sm:w-40"><label>Libellé</label>{{ variante_form.libelle }}</div>
@@ -94,10 +143,13 @@
     <div class="w-full sm:w-24"><label>Stock</label>{{ variante_form.stock }}</div>
     <button type="submit" class="inline-flex items-center gap-2 bg-soft hover:bg-slate-100 border border-line text-ink text-sm font-semibold rounded-lg py-2 px-4"><svg class="ico"><use href="#i-plus"/></svg> Ajouter</button>
   </form>
+  {% endif %}
 </div>
 
+{% if permissions.produits %}
 <form method="post" action="{% url 'produits_vendeur:supprimer' boutique.pk produit.pk %}" onsubmit="return confirm('Supprimer définitivement ce produit ?');">
   {% csrf_token %}
   <button class="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700"><svg class="ico"><use href="#i-trash"/></svg> Supprimer ce produit</button>
 </form>
+{% endif %}
 {% endblock %}

@@ -10,7 +10,6 @@ urlpatterns = [
     path("<str:reference>/", views.detail, name="detail"),
     path("<str:reference>/confirmation/", views.confirmation, name="confirmation"),
     path("<str:reference>/payer/", views.payer, name="payer"),
-    path("<str:reference>/paiement/", views.paiement_suivi, name="paiement_suivi"),
-    path("<str:reference>/paiement/verifier/", views.paiement_verifier, name="paiement_verifier"),
+    path("<str:reference>/facture/", views.facture, name="facture"),
     path("<str:reference>/annuler/", views.annuler, name="annuler"),
 ]

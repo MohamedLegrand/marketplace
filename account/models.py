@@ -67,6 +67,22 @@ class User(AbstractUser):
     def __str__(self):
         return self.email or self.username
 
+    @classmethod
+    def generer_username(cls, email):
+        """Derive un identifiant technique unique depuis l'adresse e-mail.
+
+        Le champ ``username`` (herite d'AbstractUser) est unique en base mais
+        invisible pour l'utilisateur (connexion par e-mail) : on le remplit
+        automatiquement, y compris quand un compte est cree hors du manager
+        (ex. formulaires d'inscription publics utilisant ModelForm.save()).
+        """
+        base = (email.split("@")[0] or "user")[:140]
+        username, suffixe = base, 1
+        while cls.objects.filter(username=username).exists():
+            suffixe += 1
+            username = f"{base}{suffixe}"
+        return username
+
     @property
     def est_vendeur(self):
         return self.role == self.Role.VENDEUR
@@ -74,6 +90,16 @@ class User(AbstractUser):
     @property
     def est_administrateur(self):
         return self.role == self.Role.ADMIN
+
+    @property
+    def peut_acceder_espace_vendeur(self):
+        """Vrai pour le proprietaire d'une boutique (role vendeur) mais aussi
+        pour un membre d'equipe (vendeur, caissier, gestionnaire...) auquel un
+        proprietaire a delegue un role sur sa boutique, meme si son role
+        global reste "acheteur"."""
+        if self.role == self.Role.VENDEUR:
+            return True
+        return self.roles_boutique.filter(actif=True).exists()
 
     def desactiver(self, motif=""):
         """Desactive le compte : la connexion est immediatement refusee."""

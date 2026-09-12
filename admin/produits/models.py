@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -171,3 +172,72 @@ class VarianteProduit(models.Model):
     @property
     def prix_effectif(self):
         return self.prix if self.prix is not None else self.produit.prix
+
+
+class MouvementStock(models.Model):
+    """Historique des entrees/sorties de stock d'un produit : vente
+    (decrementee automatiquement a la commande, montant = recette),
+    reapprovisionnement (ajout manuel par un vendeur ou un membre habilite)
+    ou annulation (stock retabli). Permet a l'equipe (caissier notamment) de
+    suivre l'argent et les mouvements sans recalculer a partir des commandes.
+
+    Table SQL : "mouvement_stock".
+    """
+
+    class Type(models.TextChoices):
+        VENTE = "vente", "Vente"
+        RESTOCK = "restock", "Reapprovisionnement"
+        ANNULATION = "annulation", "Annulation (stock retabli)"
+
+    produit = models.ForeignKey(
+        Produit,
+        on_delete=models.CASCADE,
+        related_name="mouvements_stock",
+        verbose_name="produit",
+        db_column="produit_id",
+    )
+    variante = models.ForeignKey(
+        VarianteProduit,
+        on_delete=models.CASCADE,
+        related_name="mouvements_stock",
+        verbose_name="variante",
+        null=True,
+        blank=True,
+        db_column="variante_id",
+    )
+    type_mouvement = models.CharField(
+        "type", max_length=12, choices=Type.choices, db_column="type_mouvement"
+    )
+    quantite = models.PositiveIntegerField("quantite", db_column="quantite")
+    montant = models.PositiveIntegerField(
+        "montant (XAF)", null=True, blank=True, db_column="montant"
+    )
+    commande = models.ForeignKey(
+        "commandes.Commande",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="mouvements_stock",
+        verbose_name="commande",
+        db_column="commande_id",
+    )
+    auteur = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="mouvements_stock",
+        verbose_name="auteur",
+        db_column="auteur_id",
+    )
+    note = models.CharField("note", max_length=200, blank=True, db_column="note")
+    date_creation = models.DateTimeField("date", auto_now_add=True, db_column="date_creation")
+
+    class Meta:
+        db_table = "mouvement_stock"
+        verbose_name = "mouvement de stock"
+        verbose_name_plural = "mouvements de stock"
+        ordering = ["-date_creation"]
+
+    def __str__(self):
+        return f"{self.get_type_mouvement_display()} - {self.produit} ({self.quantite})"

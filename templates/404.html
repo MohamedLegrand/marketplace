@@ -1,0 +1,36 @@
+{% extends "client/base.html" %}
+{% block titre %}Page introuvable · Jennifer Website{% endblock %}
+
+{% block contenu %}
+<div class="max-w-lg mx-auto text-center py-10 sm:py-16">
+  <div class="relative mx-auto w-28 h-28 sm:w-32 sm:h-32 mb-2">
+    <span class="absolute inset-0 rounded-full bg-brand/10"></span>
+    <span class="absolute inset-0 flex items-center justify-center">
+      <svg class="text-brand" style="width:44px;height:44px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+        <path d="M9 11h4"/>
+      </svg>
+    </span>
+  </div>
+
+  <p class="text-6xl sm:text-7xl font-bold text-ink tracking-tight">404</p>
+  <h1 class="text-xl sm:text-2xl font-semibold text-ink mt-3">Page introuvable</h1>
+  <p class="text-muted mt-2 max-w-sm mx-auto">
+    La page que vous cherchez n'existe pas, a été déplacée, ou l'adresse comporte une erreur.
+  </p>
+
+  <div class="flex flex-wrap items-center justify-center gap-3 mt-8">
+    <a href="{% url 'catalogue:landing' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
+      <svg class="ico"><use href="#i-store"/></svg> Retour à l'accueil
+    </a>
+    <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 border border-line hover:border-brand/60 text-fg font-semibold rounded-lg py-2.5 px-5 text-sm">
+      <svg class="ico"><use href="#i-search"/></svg> Parcourir les boutiques
+    </a>
+  </div>
+
+  <p class="text-sm text-muted mt-8">
+    Besoin d'aide ? <a href="{% url 'contact:contact' %}" class="text-brand font-medium">Contactez-nous</a>
+  </p>
+</div>
+{% endblock %}

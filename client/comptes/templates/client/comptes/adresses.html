@@ -1,12 +1,9 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Mes adresses{% endblock %}
+{% block entete %}Mes adresses{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'comptes_client:tableau_de_bord' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
-  <svg class="ico"><use href="#i-back"/></svg> Mon compte
-</a>
-
-<div class="flex items-center justify-between mt-3 mb-5">
+<div class="flex items-center justify-between mb-5">
   <h1 class="text-2xl font-semibold text-ink">Mes adresses de livraison</h1>
   <a href="{% url 'comptes_client:adresse_creer' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
     <svg class="ico"><use href="#i-plus"/></svg> Nouvelle adresse

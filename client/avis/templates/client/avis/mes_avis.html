@@ -1,11 +1,9 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Mes avis{% endblock %}
+{% block entete %}Mes avis{% endblock %}
 
 {% block contenu %}
-<a href="{% url 'comptes_client:tableau_de_bord' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
-  <svg class="ico"><use href="#i-back"/></svg> Mon compte
-</a>
-<h1 class="text-2xl font-semibold text-ink mt-3 mb-5">Mes avis</h1>
+<h1 class="text-2xl font-semibold text-ink mb-5">Mes avis</h1>
 
 {% if avis %}
   <div class="space-y-3">

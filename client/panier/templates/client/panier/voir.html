@@ -1,5 +1,6 @@
-{% extends "client/base.html" %}
-{% block titre %}Mon panier · Marketplace{% endblock %}
+{% extends base_shell %}
+{% block titre %}Mon panier · Jennifer Website{% endblock %}
+{% block entete %}Mon panier{% endblock %}
 
 {% block contenu %}
 <h1 class="text-2xl font-semibold text-ink mb-4">Mon panier</h1>
@@ -11,7 +12,7 @@
     {% for l in lignes %}
       <div class="p-4 flex flex-wrap items-center gap-3 sm:gap-4">
         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-slate-100 border border-line overflow-hidden shrink-0 flex items-center justify-center text-muted">
-          {% if l.produit.photo_principale %}<img src="{{ l.produit.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
+          {% if l.produit.photo_principale %}<img src="{{ l.produit.photo_principale.image.url }}" class="w-full h-full object-contain">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
         </div>
         <div class="flex-1 min-w-[8rem]">
           <p class="font-medium text-ink truncate">{{ l.produit.nom }}</p>
@@ -63,7 +64,7 @@
   <div class="bg-surface border border-line rounded-xl p-10 text-center">
     <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-cart"/></svg>
     <p class="text-muted mt-3 mb-4">Votre panier est vide.</p>
-    <a href="{% url 'catalogue:accueil' %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
+    <a href="{% if user.is_authenticated and user.role == 'acheteur' %}{% url 'comptes_client:boutiques' %}{% else %}{% url 'catalogue:accueil' %}{% endif %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
       <svg class="ico"><use href="#i-store"/></svg> Voir les boutiques
     </a>
   </div>

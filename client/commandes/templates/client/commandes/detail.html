@@ -1,5 +1,6 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Commande {{ commande.reference }}{% endblock %}
+{% block entete %}Mes commandes{% endblock %}
 
 {% block contenu %}
 <a href="{% url 'commandes_client:liste' %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
@@ -59,7 +60,11 @@
 <div class="flex flex-wrap gap-3 mt-4">
   {% if commande.statut == "en_attente_paiement" %}
     <a href="{% url 'commandes_client:payer' commande.reference %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
-      <svg class="ico"><use href="#i-card"/></svg> Payer par Mobile Money
+      <svg class="ico"><use href="#i-card"/></svg> Effectuer le paiement
+    </a>
+  {% else %}
+    <a href="{% url 'commandes_client:facture' commande.reference %}" class="inline-flex items-center gap-2 bg-soft hover:bg-slate-100 border border-line text-ink text-sm font-semibold rounded-lg py-2 px-4">
+      <svg class="ico"><use href="#i-receipt"/></svg> Télécharger la facture
     </a>
   {% endif %}
   {% if commande.annulable_par_client %}

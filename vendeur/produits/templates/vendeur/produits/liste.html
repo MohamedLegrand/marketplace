@@ -9,28 +9,36 @@
 
 <div class="flex items-center justify-between mt-3 mb-5">
   <h2 class="text-xl font-semibold text-ink">Produits</h2>
+  {% if permissions.produits %}
   <a href="{% url 'produits_vendeur:creer' boutique.pk %}" class="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2 px-4">
     <svg class="ico"><use href="#i-plus"/></svg> Nouveau produit
   </a>
+  {% endif %}
 </div>
 
 {% if produits %}
-  <div class="grid sm:grid-cols-2 gap-3">
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for p in produits %}
-      <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="bg-surface border border-line rounded-xl p-4 hover:border-brand/50 flex gap-3">
-        <div class="w-16 h-16 rounded-lg bg-soft border border-line shrink-0 overflow-hidden flex items-center justify-center text-muted">
-          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
-        </div>
-        <div class="min-w-0">
-          <p class="font-medium text-ink truncate">{{ p.nom }}</p>
-          <p class="text-sm text-muted">{{ p.prix }} XAF · stock {{ p.stock_total }}</p>
-          <p class="text-xs mt-1">
+      <div class="bg-surface border border-line rounded-xl overflow-hidden hover:border-brand/50 transition-colors flex flex-col">
+        <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="aspect-square bg-soft flex items-center justify-center text-muted">
+          {% if p.photo_principale %}<img src="{{ p.photo_principale.image.url }}" class="w-full h-full object-contain">{% else %}<svg class="ico"><use href="#i-image"/></svg>{% endif %}
+        </a>
+        <div class="p-3 flex flex-col flex-1">
+          <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="font-medium text-ink truncate hover:text-brand">{{ p.nom }}</a>
+          <p class="text-xs mt-0.5">
             {% if p.masque_par_admin %}<span class="text-red-600">Masqué par l'admin</span>
             {% elif p.actif %}<span class="text-emerald-700">En vente</span>
             {% else %}<span class="text-muted">Hors vente</span>{% endif %}
+            <span class="text-muted">· stock {{ p.stock_total }}</span>
           </p>
+          <div class="mt-auto pt-2.5 flex items-center justify-between gap-2">
+            <span class="text-brand font-semibold">{{ p.prix }} XAF</span>
+            <a href="{% url 'produits_vendeur:detail' boutique.pk p.pk %}" class="inline-flex items-center gap-1 text-xs font-semibold bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-1.5 px-2.5 whitespace-nowrap">
+              Détails <svg class="ico" style="width:12px;height:12px"><use href="#i-arrow"/></svg>
+            </a>
+          </div>
         </div>
-      </a>
+      </div>
     {% endfor %}
   </div>
 {% else %}

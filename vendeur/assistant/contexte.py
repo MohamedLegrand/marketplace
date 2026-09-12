@@ -4,7 +4,7 @@ concrets plutot que des generalites.
 """
 from django.db.models import F, Sum
 
-PROMPT_SYSTEME = """Tu es l'assistant IA d'analyse des ventes de Marketplace, \
+PROMPT_SYSTEME = """Tu es l'assistant IA d'analyse des ventes de Jennifer Website, \
 integre a l'espace vendeur. Tu aides {vendeur} a comprendre les performances \
 de sa boutique « {boutique} » et tu proposes des recommandations concretes et \
 actionnables pour vendre davantage (mise en avant de produits, gestion du \

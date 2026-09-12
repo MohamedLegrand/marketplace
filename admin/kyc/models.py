@@ -101,6 +101,27 @@ class DossierKYC(models.Model):
 
     def valider(self, admin_user):
         self._appliquer_decision(admin_user, self.Statut.VALIDE, JournalKYC.Action.VALIDATION)
+        self._activer_forfait_test()
+
+    def _activer_forfait_test(self):
+        """Raccourci de TEST : des qu'un vendeur est valide KYC, on lui offre
+        directement un abonnement actif au forfait le plus eleve (avec IA
+        d'analyse des ventes), sans passer par le choix de forfait ni le
+        paiement. A retirer avant mise en production reelle - remettre alors
+        le parcours normal (etape FORFAIT puis PAIEMENT de l'onboarding)."""
+        from admin.abonnements.models import Abonnement, Plan
+
+        plan = (
+            Plan.objects.filter(actif=True, ia_analyse_ventes=True).order_by("-prix").first()
+            or Plan.objects.filter(actif=True).order_by("-prix").first()
+        )
+        if plan is None:
+            return
+        abonnement = (
+            self.vendeur.abonnements.filter(plan=plan).order_by("-date_creation").first()
+            or Abonnement(vendeur=self.vendeur, plan=plan)
+        )
+        abonnement.activer(reference="test-kyc-auto")
 
     def rejeter(self, admin_user, motif):
         self._appliquer_decision(admin_user, self.Statut.REJETE, JournalKYC.Action.REJET, motif)

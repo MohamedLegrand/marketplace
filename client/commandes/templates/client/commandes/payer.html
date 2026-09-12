@@ -1,29 +1,76 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Payer · {{ commande.reference }}{% endblock %}
+{% block entete %}Paiement{% endblock %}
 
 {% block contenu %}
 <div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
   <h1 class="text-lg font-semibold text-ink mb-1 flex items-center gap-2"><svg class="ico text-brand"><use href="#i-card"/></svg> Paiement Mobile Money</h1>
   <p class="text-sm text-muted">Commande {{ commande.reference }}</p>
-  <p class="text-lg font-bold text-ink mt-1 mb-5">{{ commande.total }} XAF</p>
+  <p class="text-2xl font-bold text-ink mt-1 mb-5">{{ commande.total }} XAF</p>
 
-  <form method="post" class="form-c space-y-3">
+  <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-3.5 py-3 text-sm mb-5">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-info"/></svg>
+    <span>Paiement simulé : aucun agrégateur externe n'est utilisé. Le montant est déjà défini ; choisissez votre opérateur, saisissez un code PIN puis validez.</span>
+  </div>
+
+  <form method="post" class="form-c" id="form-paiement">
     {% csrf_token %}
-    <div>
-      <label>Opérateur</label>
-      <select name="operateur" required>
-        {% for val, lib in operateurs %}<option value="{{ val }}">{{ lib }}</option>{% endfor %}
-      </select>
+    <p>Opérateur</p>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      {% for valeur, libelle in operateurs %}
+        <label class="op-choix flex items-center justify-center gap-2 border border-line rounded-lg py-3 px-2 text-sm font-medium text-fg cursor-pointer">
+          <input type="radio" name="operateur" value="{{ valeur }}" required class="sr-only">
+          {{ libelle }}
+        </label>
+      {% endfor %}
     </div>
+
     <div>
-      <label>Numéro (format 2376XXXXXXXX)</label>
-      <div class="field with-ico">
-        <svg class="field-ico"><use href="#i-phone"/></svg>
-        <input type="text" name="telephone" value="{{ request.user.telephone|default:'' }}" placeholder="2376XXXXXXXX" required>
-      </div>
+      <label for="id_pin">Code PIN</label>
+      <input type="password" inputmode="numeric" autocomplete="off" id="id_pin" name="pin"
+             placeholder="Choisissez d'abord un opérateur" disabled
+             class="tracking-[.3em] text-center">
+      <span class="helptext" id="pin-aide">Le code PIN n'est pas vérifié : toute valeur de la bonne longueur est acceptée.</span>
     </div>
-    <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Payer {{ commande.total }} XAF</button>
+
+    <button type="submit" class="w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm mt-5">
+      <svg class="ico"><use href="#i-check-circle"/></svg> Paiement effectué
+    </button>
   </form>
-  <p class="text-xs text-muted mt-3">Vous recevrez une demande de validation sur votre téléphone.</p>
 </div>
+
+<script>
+  (function () {
+    var LONGUEURS = { "orange": 4, "mtn": 5 };
+    var champs = document.querySelectorAll('.op-choix input[name="operateur"]');
+    var labels = document.querySelectorAll('.op-choix');
+    var pin = document.getElementById('id_pin');
+    var aide = document.getElementById('pin-aide');
+
+    function actualiser() {
+      labels.forEach(function (l) {
+        var input = l.querySelector('input');
+        l.classList.toggle('op-choix-actif', input.checked);
+      });
+      var selection = document.querySelector('.op-choix input[name="operateur"]:checked');
+      if (!selection) { return; }
+      var longueur = LONGUEURS[selection.value] || 4;
+      pin.disabled = false;
+      pin.maxLength = longueur;
+      pin.placeholder = '•'.repeat(longueur);
+      pin.value = '';
+      aide.textContent = 'Entrez ' + longueur + ' chiffres, n\'importe lesquels : la valeur n\'est pas vérifiée.';
+    }
+    champs.forEach(function (c) { c.addEventListener('change', actualiser); });
+
+    pin.addEventListener('input', function () {
+      pin.value = pin.value.replace(/\D/g, '');
+    });
+  })();
+</script>
+
+<style>
+  .op-choix { transition: border-color .15s, background-color .15s; }
+  .op-choix:has(input:checked), .op-choix-actif { border-color: #2f6fed; background: rgba(47,111,237,.06); color: #2f6fed; }
+</style>
 {% endblock %}

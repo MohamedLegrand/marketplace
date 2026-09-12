@@ -1,5 +1,6 @@
-{% extends "client/base.html" %}
+{% extends base_shell %}
 {% block titre %}{{ produit.nom }} · {{ boutique.nom }}{% endblock %}
+{% block entete %}{{ produit.nom }}{% endblock %}
 
 {% block contenu %}
 <a href="{% url 'catalogue:boutique' boutique.slug %}" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
@@ -8,13 +9,13 @@
 
 <div class="grid md:grid-cols-2 gap-6 mt-3">
   <div>
-    <div class="aspect-square bg-surface border border-line rounded-xl overflow-hidden flex items-center justify-center text-muted">
-      {% if produit.photo_principale %}<img src="{{ produit.photo_principale.image.url }}" class="w-full h-full object-cover">{% else %}<svg style="width:32px;height:32px"><use href="#i-image"/></svg>{% endif %}
+    <div class="aspect-square bg-soft border border-line rounded-xl overflow-hidden flex items-center justify-center text-muted">
+      {% if produit.photo_principale %}<img src="{{ produit.photo_principale.image.url }}" class="w-full h-full object-contain">{% else %}<svg style="width:32px;height:32px"><use href="#i-image"/></svg>{% endif %}
     </div>
     {% if photos|length > 1 %}
       <div class="flex gap-2 mt-2">
         {% for ph in photos %}
-          <div class="w-16 h-16 rounded-lg overflow-hidden border border-line"><img src="{{ ph.image.url }}" class="w-full h-full object-cover"></div>
+          <div class="w-16 h-16 rounded-lg overflow-hidden bg-soft border border-line flex items-center justify-center"><img src="{{ ph.image.url }}" class="w-full h-full object-contain"></div>
         {% endfor %}
       </div>
     {% endif %}

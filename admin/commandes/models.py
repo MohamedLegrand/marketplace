@@ -88,7 +88,7 @@ class Commande(models.Model):
     def annuler(self, auteur, commentaire=""):
         if self.statut == self.Statut.ANNULEE:
             return
-        from admin.produits.models import Produit, VarianteProduit
+        from admin.produits.models import MouvementStock, Produit, VarianteProduit
 
         for ligne in self.lignes.all():
             if ligne.variante_id:
@@ -98,6 +98,16 @@ class Commande(models.Model):
             elif ligne.produit_id:
                 Produit.objects.filter(pk=ligne.produit_id).update(
                     stock=F("stock") + ligne.quantite
+                )
+            if ligne.produit_id:
+                MouvementStock.objects.create(
+                    produit_id=ligne.produit_id,
+                    variante_id=ligne.variante_id,
+                    type_mouvement=MouvementStock.Type.ANNULATION,
+                    quantite=ligne.quantite,
+                    montant=ligne.prix_unitaire * ligne.quantite,
+                    commande=self,
+                    auteur=auteur if getattr(auteur, "pk", None) else None,
                 )
         self.changer_statut(auteur, self.Statut.ANNULEE, commentaire or "Commande annulee")
 

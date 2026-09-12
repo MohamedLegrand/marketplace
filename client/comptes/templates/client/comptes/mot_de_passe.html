@@ -1,10 +1,11 @@
-{% extends "client/base.html" %}
+{% extends "client/dashboard_base.html" %}
 {% block titre %}Changer de mot de passe{% endblock %}
+{% block entete %}Mon profil{% endblock %}
 
 {% block contenu %}
-<div class="max-w-md mx-auto bg-surface border border-line rounded-2xl p-7">
+<div class="max-w-xl mx-auto bg-surface border border-line rounded-2xl p-7">
   <h1 class="text-lg font-semibold text-ink mb-5 flex items-center gap-2"><svg class="ico text-muted"><use href="#i-key"/></svg> Changer de mot de passe</h1>
-  <form method="post" class="form-c">
+  <form method="post" class="form-c form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}

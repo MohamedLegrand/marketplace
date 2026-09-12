@@ -1,0 +1,51 @@
+{% extends "vendeur/base.html" %}
+{% block titre %}Tableau de bord{% endblock %}
+{% block entete %}Tableau de bord{% endblock %}
+
+{% block contenu %}
+<div class="mb-6">
+  <h2 class="text-xl font-semibold text-ink">Bonjour {{ user.first_name|default:user.email }}</h2>
+  <p class="text-sm text-muted mt-1">Vous faites partie de l'équipe des boutiques ci-dessous.</p>
+</div>
+
+{% if roles %}
+  <div class="grid sm:grid-cols-2 gap-4">
+    {% for role in roles %}
+      <div class="bg-surface border border-line rounded-xl p-5">
+        <div class="flex items-center justify-between mb-1">
+          <p class="font-semibold text-ink">{{ role.boutique.nom }}</p>
+          <span class="inline-flex items-center text-xs bg-brand/10 text-brand px-2 py-0.5 rounded-full font-medium">
+            {{ role.libelle|default:role.get_type_role_display }}
+          </span>
+        </div>
+        <p class="text-xs text-muted mb-3">{{ role.boutique.get_statut_display }}</p>
+        <div class="flex flex-wrap gap-2 text-sm">
+          <a href="{% url 'boutiques_vendeur:detail' role.boutique.pk %}" class="inline-flex items-center gap-1.5 bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-1.5 px-3">
+            <svg class="ico" style="width:15px;height:15px"><use href="#i-store"/></svg> Boutique
+          </a>
+          {% if role.peut_gerer_produits or role.peut_gerer_stock %}
+          <a href="{% url 'produits_vendeur:liste' role.boutique.pk %}" class="inline-flex items-center gap-1.5 bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-1.5 px-3">
+            <svg class="ico" style="width:15px;height:15px"><use href="#i-package"/></svg> Produits
+          </a>
+          {% endif %}
+          {% if role.peut_gerer_commandes %}
+          <a href="{% url 'commandes_vendeur:liste' role.boutique.pk %}" class="inline-flex items-center gap-1.5 bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-1.5 px-3">
+            <svg class="ico" style="width:15px;height:15px"><use href="#i-bag"/></svg> Commandes
+          </a>
+          {% endif %}
+          {% if role.peut_voir_statistiques %}
+          <a href="{% url 'caisse_vendeur:rapport' role.boutique.pk %}" class="inline-flex items-center gap-1.5 bg-soft hover:bg-slate-100 border border-line text-ink rounded-lg py-1.5 px-3">
+            <svg class="ico" style="width:15px;height:15px"><use href="#i-card"/></svg> Caisse
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-surface border border-line rounded-xl p-6 text-center">
+    <p class="text-sm text-muted">Vous n'avez plus accès à aucune boutique pour le moment.</p>
+    <p class="text-xs text-muted mt-1">Contactez le propriétaire de la boutique si besoin.</p>
+  </div>
+{% endif %}
+{% endblock %}

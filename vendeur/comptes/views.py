@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.views import (
     LoginView,
     LogoutView,
@@ -12,18 +10,11 @@ from django.urls import reverse_lazy
 from admin.abonnements.models import Abonnement, Plan
 from admin.abonnements.services import abonnement_actif
 from admin.kyc.models import DossierKYC
-from admin.paiements.gateway import HRSkillsPayError
-from admin.paiements.models import Paiement
-from admin.paiements.services import (
-    initier_paiement_abonnement,
-    synchroniser_statut,
-)
+from admin.paiements.services import simuler_paiement_abonnement
 
-from .decorators import vendeur_required
+from .decorators import espace_vendeur_required, vendeur_required
 from .forms import DossierKYCForm, InscriptionVendeurForm, ProfilVendeurForm
 from . import onboarding
-
-BACKEND = "django.contrib.auth.backends.ModelBackend"
 
 _ETAPE_VERS_URL = {
     onboarding.PROFIL: "comptes_vendeur:profil",
@@ -45,7 +36,7 @@ def _rediriger_vers_etape(user):
 # ---------------------------------------------------------------------------
 def inscription(request):
     if request.user.is_authenticated:
-        if request.user.role == request.user.Role.VENDEUR:
+        if request.user.peut_acceder_espace_vendeur:
             return redirect("comptes_vendeur:tableau_de_bord")
         # Deja connecte, mais avec un autre type de compte (acheteur, admin...) :
         # rediriger vers le tableau de bord vendeur declencherait un 403
@@ -57,10 +48,9 @@ def inscription(request):
 
     form = InscriptionVendeurForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user, backend=BACKEND)
-        messages.success(request, "Compte cree. Completons votre profil.")
-        return redirect("comptes_vendeur:tableau_de_bord")
+        form.save()
+        messages.success(request, "Compte créé avec succès. Connectez-vous pour continuer.")
+        return redirect("catalogue:connexion")
     return render(request, "vendeur/auth/inscription.html", {"form": form})
 
 
@@ -74,7 +64,7 @@ class Connexion(LoginView):
         # role n'est pas vendeur, renvoyer vers le tableau de bord vendeur
         # declencherait un 403 (page presque vide) : on renvoie vers la page
         # d'inscription, qui affiche alors une explication claire.
-        if self.request.user.role != self.request.user.Role.VENDEUR:
+        if not self.request.user.peut_acceder_espace_vendeur:
             return reverse_lazy("comptes_vendeur:inscription")
         return reverse_lazy("comptes_vendeur:tableau_de_bord")
 
@@ -95,17 +85,18 @@ class ChangerMotDePasse(PasswordChangeView):
 # ---------------------------------------------------------------------------
 # Profil
 # ---------------------------------------------------------------------------
-@vendeur_required
+@espace_vendeur_required
 def profil(request):
     form = ProfilVendeurForm(request.POST or None, instance=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Profil enregistre.")
         return redirect("comptes_vendeur:tableau_de_bord")
+    etape = onboarding.etape_courante(request.user) if request.user.role == request.user.Role.VENDEUR else None
     return render(
         request,
         "vendeur/auth/profil.html",
-        {"form": form, "etape": onboarding.etape_courante(request.user)},
+        {"form": form, "etape": etape},
     )
 
 
@@ -177,6 +168,9 @@ def onboarding_forfait(request):
 # ---------------------------------------------------------------------------
 @vendeur_required
 def onboarding_paiement(request):
+    """Paiement simule (plus d'agregateur externe) : un clic marque la
+    transaction comme reussie et active l'abonnement. La transaction est
+    tout de meme stockee (table paiement) pour l'historique."""
     user = request.user
     abonnement = (
         Abonnement.objects.filter(vendeur=user, statut=Abonnement.Statut.EN_ATTENTE)
@@ -188,43 +182,13 @@ def onboarding_paiement(request):
             return redirect("comptes_vendeur:tableau_de_bord")
         return redirect("comptes_vendeur:forfait")
 
-    paiement = abonnement.paiements.order_by("-date_creation").first()
-
     if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "verifier" and paiement:
-            try:
-                synchroniser_statut(paiement)
-            except HRSkillsPayError as err:
-                messages.error(request, f"Verification impossible : {err.message or err.code}")
-                return redirect("comptes_vendeur:paiement")
-            if abonnement_actif(user):
-                messages.success(request, "Paiement confirme. Votre boutique peut demarrer.")
-                return redirect("comptes_vendeur:tableau_de_bord")
-            paiement.refresh_from_db()
-            if paiement.statut == Paiement.Statut.ECHOUE:
-                messages.error(request, "Le paiement a echoue. Reessayez.")
-        elif action == "initier":
-            operateur = request.POST.get("operateur")
-            telephone = (request.POST.get("telephone") or "").strip()
-            if operateur not in dict(settings.OPERATEURS_MOBILE_MONEY) or not telephone:
-                messages.error(request, "Choisissez un operateur et saisissez votre numero.")
-            else:
-                try:
-                    initier_paiement_abonnement(abonnement, operateur, telephone)
-                except HRSkillsPayError as err:
-                    messages.error(request, f"Echec de l'initiation : {err.message or err.code}")
-                else:
-                    messages.success(
-                        request,
-                        "Paiement initie. Validez la demande sur votre telephone, puis cliquez sur Verifier.",
-                    )
-        return redirect("comptes_vendeur:paiement")
+        simuler_paiement_abonnement(abonnement)
+        messages.success(request, "Paiement effectue (simulation). Votre boutique peut demarrer.")
+        return redirect("comptes_vendeur:tableau_de_bord")
 
     return render(request, "vendeur/onboarding/paiement.html", {
         "abonnement": abonnement,
-        "paiement": paiement,
-        "operateurs": settings.OPERATEURS_MOBILE_MONEY,
         "etape": onboarding.PAIEMENT,
     })
 
@@ -232,9 +196,17 @@ def onboarding_paiement(request):
 # ---------------------------------------------------------------------------
 # Tableau de bord
 # ---------------------------------------------------------------------------
-@vendeur_required
+@espace_vendeur_required
 def tableau_de_bord(request):
     user = request.user
+
+    if user.role != user.Role.VENDEUR:
+        # Membre d'equipe (caissier, vendeur delegue, gestionnaire...) sans
+        # boutique en propre : tableau de bord dedie, sans onboarding.
+        return render(request, "vendeur/tableau_de_bord_equipe.html", {
+            "roles": user.roles_boutique.filter(actif=True).select_related("boutique"),
+        })
+
     if not onboarding.onboarding_termine(user):
         return _rediriger_vers_etape(user) or redirect("comptes_vendeur:profil")
 

@@ -34,7 +34,7 @@
             <td class="py-2.5 px-3 text-fg">{{ r.utilisateur.email }}</td>
             <td class="text-fg">{{ r.libelle|default:r.get_type_role_display }}<div class="text-xs text-muted">{{ r.get_type_role_display }}</div></td>
             <td class="text-xs text-muted">
-              {% if r.peut_gerer_produits %}Produits · {% endif %}{% if r.peut_gerer_stock %}Stock · {% endif %}{% if r.peut_gerer_commandes %}Commandes · {% endif %}{% if r.peut_voir_statistiques %}Stats{% endif %}
+              {% if r.peut_gerer_produits %}Produits · {% endif %}{% if r.peut_gerer_stock %}Stock · {% endif %}{% if r.peut_gerer_commandes %}Commandes · {% endif %}{% if r.peut_voir_statistiques %}Caisse{% endif %}
             </td>
             <td>
               {% if r.actif %}<span class="text-xs border border-emerald-200 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Actif</span>

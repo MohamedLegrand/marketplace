@@ -7,9 +7,9 @@
   <svg class="ico"><use href="#i-back"/></svg> Retour à la boutique
 </a>
 
-<div class="bg-surface border border-line rounded-2xl p-6 max-w-md">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-xl">
   <h2 class="text-lg font-semibold text-ink mb-5">Zone : {{ zone.nom }}</h2>
-  <form method="post" class="form-v">
+  <form method="post" class="form-v form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}

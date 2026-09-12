@@ -8,17 +8,32 @@
   <svg class="ico"><use href="#i-back"/></svg> Retour
 </a>
 
-<div class="bg-surface border border-line rounded-2xl p-6 max-w-xl">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-2xl">
   <h2 class="text-lg font-semibold text-ink mb-5">
     {% if mode == "creer" %}Créer ma boutique{% else %}Modifier {{ boutique.nom }}{% endif %}
   </h2>
-  <form method="post" enctype="multipart/form-data" class="form-v">
+  <form method="post" enctype="multipart/form-data" class="form-v form-grid" id="form-boutique">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
     <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 px-5 text-sm">
-      {% if mode == "creer" %}Créer en brouillon{% else %}Enregistrer{% endif %}
+      {% if mode == "creer" %}Créer ma boutique{% else %}Enregistrer{% endif %}
     </button>
   </form>
 </div>
+
+<script>
+  (function () {
+    var select = document.getElementById('id_categorie_choix');
+    var champAutre = document.getElementById('id_autre_categorie');
+    if (!select || !champAutre) { return; }
+    var ligneAutre = champAutre.closest('p') || champAutre.parentElement;
+    function actualiser() {
+      var visible = select.value === 'autre';
+      ligneAutre.hidden = !visible;
+    }
+    select.addEventListener('change', actualiser);
+    actualiser();
+  })();
+</script>
 {% endblock %}

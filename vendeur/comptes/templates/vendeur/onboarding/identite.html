@@ -39,10 +39,10 @@
     </div>
   </div>
 
-  <div class="bg-surface border border-line rounded-2xl p-6 max-w-lg">
+  <div class="bg-surface border border-line rounded-2xl p-6 max-w-2xl">
     <h2 class="font-semibold text-ink mb-1">Votre dossier vendeur</h2>
     <p class="text-sm text-muted mb-5">Les documents doivent être nets et lisibles.</p>
-    <form method="post" enctype="multipart/form-data" class="form-v">
+    <form method="post" enctype="multipart/form-data" class="form-v form-grid">
       {% csrf_token %}
       {{ form.non_field_errors }}
       {{ form.as_p }}

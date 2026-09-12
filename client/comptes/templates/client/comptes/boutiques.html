@@ -1,0 +1,53 @@
+{% extends "client/dashboard_base.html" %}
+{% block titre %}Boutiques{% endblock %}
+{% block entete %}Boutiques{% endblock %}
+
+{% block contenu %}
+<h1 class="text-2xl font-semibold text-ink mb-1">Boutiques</h1>
+<p class="text-sm text-muted mb-5">Cliquez sur une boutique pour parcourir ses produits, les ajouter au panier et payer.</p>
+
+<form method="get" class="form-c bg-surface border border-line rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
+  <div class="flex-1 sm:min-w-[220px]">
+    <label>Nom ou ville</label>
+    <div class="field with-ico">
+      <svg class="field-ico"><use href="#i-pin"/></svg>
+      <input type="search" name="q" value="{{ q }}" placeholder="Rechercher une boutique…">
+    </div>
+  </div>
+  <div class="w-full sm:w-auto">
+    <label>Catégorie</label>
+    <select name="categorie" class="w-full sm:w-48">
+      <option value="">Toutes</option>
+      {% for c in categories %}
+        <option value="{{ c.pk }}" {% if categorie_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nom }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-center gap-3">
+    <button type="submit" class="w-full sm:w-auto bg-brand hover:bg-brand-hover text-white text-sm font-semibold rounded-lg py-2.5 px-5">Rechercher</button>
+    {% if q or categorie_id %}<a href="{% url 'comptes_client:boutiques' %}" class="text-sm text-muted hover:text-fg whitespace-nowrap">Réinitialiser</a>{% endif %}
+  </div>
+</form>
+
+{% if boutiques %}
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for b in boutiques %}
+      <a href="{% url 'catalogue:boutique' b.slug %}" class="bg-surface border border-line rounded-xl p-4 hover:border-brand/50 flex gap-3">
+        <div class="w-14 h-14 rounded-lg bg-slate-100 border border-line shrink-0 overflow-hidden flex items-center justify-center text-muted">
+          {% if b.logo %}<img src="{{ b.logo.url }}" class="w-full h-full object-cover">{% else %}<svg class="ico"><use href="#i-store"/></svg>{% endif %}
+        </div>
+        <div class="min-w-0">
+          <p class="font-medium text-ink truncate">{{ b.nom }}</p>
+          <p class="text-sm text-muted">{{ b.ville }}{% if b.categorie %} · {{ b.categorie }}{% endif %}</p>
+          {% if b.nombre_avis %}<div class="mt-1">{% include "client/catalogue/_etoiles.html" with note=b.note_moyenne nb=b.nombre_avis %}</div>{% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-surface border border-line rounded-xl p-10 text-center">
+    <svg class="mx-auto text-muted" style="width:32px;height:32px"><use href="#i-store"/></svg>
+    <p class="text-muted mt-3">Aucune boutique ne correspond à votre recherche.</p>
+  </div>
+{% endif %}
+{% endblock %}

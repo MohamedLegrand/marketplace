@@ -8,9 +8,9 @@
   <svg class="ico"><use href="#i-back"/></svg> Retour
 </a>
 
-<div class="bg-surface border border-line rounded-2xl p-6 max-w-xl">
+<div class="bg-surface border border-line rounded-2xl p-6 max-w-2xl">
   <h2 class="text-lg font-semibold text-ink mb-5">{% if mode == "creer" %}Créer un produit{% else %}Modifier {{ produit.nom }}{% endif %}</h2>
-  <form method="post" class="form-v">
+  <form method="post" class="form-v form-grid">
     {% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.as_p }}
@@ -19,4 +19,19 @@
     </button>
   </form>
 </div>
+
+<script>
+  (function () {
+    var select = document.getElementById('id_categorie_choix');
+    var champAutre = document.getElementById('id_autre_categorie');
+    if (!select || !champAutre) { return; }
+    var ligneAutre = champAutre.closest('p') || champAutre.parentElement;
+    function actualiser() {
+      var visible = select.value === 'autre';
+      ligneAutre.hidden = !visible;
+    }
+    select.addEventListener('change', actualiser);
+    actualiser();
+  })();
+</script>
 {% endblock %}

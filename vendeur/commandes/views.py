@@ -1,9 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
-from admin.boutiques.models import Boutique
 from admin.commandes.models import Commande
-from vendeur.comptes.decorators import onboarding_complete_required
+from vendeur.comptes.decorators import acces_boutique_required
 
 S = Commande.Statut
 
@@ -15,13 +14,21 @@ TRANSITIONS_VENDEUR = {
 }
 
 
-def _boutique(request, boutique_pk):
-    return get_object_or_404(Boutique, pk=boutique_pk, proprietaire=request.user)
+def _permissions(request):
+    role = request.role_boutique
+    if role is None:
+        return {"produits": True, "stock": True, "commandes": True, "statistiques": True}
+    return {
+        "produits": role.peut_gerer_produits,
+        "stock": role.peut_gerer_stock,
+        "commandes": role.peut_gerer_commandes,
+        "statistiques": role.peut_voir_statistiques,
+    }
 
 
-@onboarding_complete_required
+@acces_boutique_required()
 def liste(request, boutique_pk):
-    boutique = _boutique(request, boutique_pk)
+    boutique = request.boutique
     commandes = boutique.commandes.select_related("client").prefetch_related("lignes")
     statut = request.GET.get("statut", "")
     if statut:
@@ -31,25 +38,28 @@ def liste(request, boutique_pk):
         "commandes": commandes,
         "statut": statut,
         "statuts": Commande.Statut.choices,
+        "permissions": _permissions(request),
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required()
 def detail(request, boutique_pk, commande_pk):
-    boutique = _boutique(request, boutique_pk)
+    boutique = request.boutique
     commande = get_object_or_404(
         boutique.commandes.prefetch_related("lignes", "suivis"), pk=commande_pk
     )
+    permissions = _permissions(request)
     return render(request, "vendeur/commandes/detail.html", {
         "boutique": boutique,
         "commande": commande,
-        "transitions": TRANSITIONS_VENDEUR.get(commande.statut, []),
+        "transitions": TRANSITIONS_VENDEUR.get(commande.statut, []) if permissions["commandes"] else [],
+        "permissions": permissions,
     })
 
 
-@onboarding_complete_required
+@acces_boutique_required("commandes")
 def changer_statut(request, boutique_pk, commande_pk):
-    boutique = _boutique(request, boutique_pk)
+    boutique = request.boutique
     commande = get_object_or_404(boutique.commandes, pk=commande_pk)
     if request.method == "POST":
         nouveau = request.POST.get("statut")

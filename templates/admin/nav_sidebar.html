@@ -1,16 +1,13 @@
-{% load i18n %}
+{% load i18n static %}
 <button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="{% translate 'Toggle navigation' %}"></button>
 <nav class="sticky" id="nav-sidebar" aria-label="{% translate 'Sidebar' %}">
 
   <div class="nav-brand">
     <span class="nav-brand-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 9 4.5 4h15L21 9"/><path d="M4 9v11h16V9"/>
-        <path d="M4 9a3 3 0 0 0 6 0 3 3 0 0 0 4 0 3 3 0 0 0 6 0"/><path d="M9 20v-5h6v5"/>
-      </svg>
+      <img src="{% static 'img/logo.jpg' %}" alt="Jennifer Website">
     </span>
     <span class="nav-brand-text">
-      <b>Marketplace</b>
+      <b>Jennifer Website</b>
       <span>Admin console</span>
     </span>
   </div>
@@ -20,6 +17,17 @@
   <input type="search" id="nav-filter"
          placeholder="Filtrer les sections…"
          aria-label="{% translate 'Filter navigation items' %}">
+
+  <div class="module ia-module{% if '/admin/assistant-ia/' in request.path %} current-app{% endif %}">
+    <table>
+      <caption>
+        <a href="{% url 'assistant_admin:analyse' %}" class="section">Assistant IA</a>
+      </caption>
+      <tr>
+        <th scope="row"><a href="{% url 'assistant_admin:analyse' %}">Analyse globale des boutiques</a></th>
+      </tr>
+    </table>
+  </div>
 
   {% include 'admin/app_list.html' with app_list=available_apps show_changelinks=False %}
 

@@ -13,40 +13,15 @@
     Forfait : <span class="text-fg font-medium">{{ abonnement.plan.nom }}</span> — {{ abonnement.plan.prix }} XAF / mois.
   </p>
 
-  {% if paiement and paiement.statut == "en_attente" %}
-    <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 mb-4 text-sm">
-      <svg class="ico mt-0.5 shrink-0"><use href="#i-clock"/></svg>
-      <div>
-        Paiement en attente sur {{ paiement.get_operateur_display }} ({{ paiement.telephone }}).
-        Validez la demande reçue sur votre téléphone, puis vérifiez.
-        {% if paiement.reference_externe %}<br><span class="text-muted">Réf : {{ paiement.reference_externe }}</span>{% endif %}
-      </div>
-    </div>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="verifier">
-      <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">Vérifier le paiement</button>
-    </form>
-  {% endif %}
+  <div class="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 mb-5 text-sm">
+    <svg class="ico mt-0.5 shrink-0"><use href="#i-info"/></svg>
+    <span>Paiement simulé : aucun agrégateur externe n'est utilisé. Cliquez sur le bouton ci-dessous pour marquer le paiement comme effectué.</span>
+  </div>
 
-  <form method="post" class="form-v space-y-3 {% if paiement and paiement.statut == 'en_attente' %}mt-4 border-t border-line pt-4{% endif %}">
+  <form method="post">
     {% csrf_token %}
-    <input type="hidden" name="action" value="initier">
-    <div>
-      <label>Opérateur</label>
-      <select name="operateur" required>
-        {% for val, lib in operateurs %}<option value="{{ val }}">{{ lib }}</option>{% endfor %}
-      </select>
-    </div>
-    <div>
-      <label>Numéro (format 2376XXXXXXXX)</label>
-      <div class="field with-ico">
-        <svg class="field-ico"><use href="#i-phone"/></svg>
-        <input type="text" name="telephone" value="{{ request.user.telephone|default:'' }}" placeholder="2376XXXXXXXX" required>
-      </div>
-    </div>
-    <button type="submit" class="w-full bg-soft hover:bg-slate-100 border border-line text-ink font-semibold rounded-lg py-2.5 text-sm">
-      {% if paiement and paiement.statut == "en_attente" %}Relancer un paiement{% else %}Payer {{ abonnement.plan.prix }} XAF{% endif %}
+    <button type="submit" class="w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-hover text-white font-semibold rounded-lg py-2.5 text-sm">
+      <svg class="ico"><use href="#i-check-circle"/></svg> Paiement effectué
     </button>
   </form>
 

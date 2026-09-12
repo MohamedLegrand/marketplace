@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>{% block titre %}Marketplace{% endblock %}</title>
+  <title>{% block titre %}Jennifer Website{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -49,6 +49,18 @@
     .form-c p { margin-bottom:14px; }
     .form-c .helptext { display:block; font-size:.72rem; color:#6b7f9c; margin-top:4px; }
     .form-c ul.errorlist { list-style:none; padding:0; margin:4px 0 8px; color:#c0392b; font-size:.8rem; }
+
+    /* Formulaires horizontaux (2 colonnes) : tout sauf connexion/inscription,
+       qui restent verticaux pour rester simples et rassurants. */
+    .form-c.form-grid { display:grid; grid-template-columns:1fr 1fr; column-gap:16px; align-items:start; }
+    .form-c.form-grid > p { margin-bottom:14px; min-width:0; }
+    .form-c.form-grid > p:has(textarea),
+    .form-c.form-grid > p:has(input[type=file]),
+    .form-c.form-grid > p:has(input[type=checkbox]),
+    .form-c.form-grid > ul.errorlist,
+    .form-c.form-grid > div,
+    .form-c.form-grid > button { grid-column:1 / -1; }
+    @media (max-width:640px) { .form-c.form-grid { grid-template-columns:1fr; } }
 
     .field { position:relative; }
     .field > .field-ico { position:absolute; left:12px; top:50%; transform:translateY(-50%);
@@ -111,20 +123,24 @@
   <header class="sticky top-0 z-30 bg-white border-b border-line">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       <a href="{% url 'catalogue:landing' %}#accueil" class="flex items-center shrink-0">
-        <img src="{% static 'img/logo.jpg' %}" alt="Marketplace" class="h-9 sm:h-10 w-auto mix-blend-multiply">
+        <img src="{% static 'img/logo.jpg' %}" alt="Jennifer Website" class="h-9 sm:h-10 w-auto mix-blend-multiply">
       </a>
 
       {# --- navigation bureau --- #}
       <nav class="hidden md:flex items-center gap-5 text-sm">
         <a href="{% url 'catalogue:landing' %}#accueil" class="text-fg hover:text-brand">Accueil</a>
+        {% block lien_boutiques_desktop %}
         <a href="{% url 'catalogue:accueil' %}" class="text-fg hover:text-brand">Boutiques</a>
+        {% endblock %}
         <a href="{% url 'catalogue:landing' %}#comment" class="text-fg hover:text-brand hidden lg:inline">Comment ça marche</a>
         <a href="{% url 'catalogue:apropos' %}" class="text-fg hover:text-brand">À propos</a>
         <a href="{% url 'contact:contact' %}" class="text-fg hover:text-brand">Contact</a>
+        {% block panier_desktop %}
         <a href="{% url 'panier:voir' %}" class="flex items-center gap-1.5 text-fg hover:text-brand font-medium">
           <svg class="ico"><use href="#i-cart"/></svg>
           Panier{% if panier_nb %}<span class="ml-0.5 bg-brand text-white text-[11px] rounded-full px-1.5 py-0.5 leading-none">{{ panier_nb }}</span>{% endif %}
         </a>
+        {% endblock %}
         {% if user.is_authenticated and user.role == "acheteur" %}
           <a href="{% url 'comptes_client:tableau_de_bord' %}" class="flex items-center gap-1.5 text-fg hover:text-brand"><svg class="ico"><use href="#i-user"/></svg> Mon compte</a>
           <form method="post" action="{% url 'comptes_client:deconnexion' %}">{% csrf_token %}
@@ -138,10 +154,12 @@
 
       {# --- barre mobile --- #}
       <div class="flex items-center gap-3 md:hidden">
+        {% block panier_mobile %}
         <a href="{% url 'panier:voir' %}" class="relative flex items-center text-fg">
           <svg class="ico" style="width:20px;height:20px"><use href="#i-cart"/></svg>
           {% if panier_nb %}<span class="absolute -top-1.5 -right-2 bg-brand text-white text-[10px] rounded-full px-1 leading-tight">{{ panier_nb }}</span>{% endif %}
         </a>
+        {% endblock %}
         <button id="c-burger" type="button" aria-label="Menu" class="text-fg -mr-1"><svg class="ico" style="width:24px;height:24px"><use href="#i-menu"/></svg></button>
       </div>
     </div>
@@ -150,7 +168,9 @@
     <div id="c-menu" hidden class="md:hidden border-t border-line bg-white">
       <nav class="max-w-5xl mx-auto px-4 py-3 flex flex-col text-sm divide-y divide-line">
         <a href="{% url 'catalogue:landing' %}#accueil" class="py-2.5 text-fg">Accueil</a>
+        {% block lien_boutiques_mobile %}
         <a href="{% url 'catalogue:accueil' %}" class="py-2.5 text-fg">Boutiques</a>
+        {% endblock %}
         <a href="{% url 'catalogue:landing' %}#comment" class="py-2.5 text-fg">Comment ça marche</a>
         <a href="{% url 'catalogue:apropos' %}" class="py-2.5 text-fg">À propos</a>
         <a href="{% url 'contact:contact' %}" class="py-2.5 text-fg">Contact</a>
@@ -173,7 +193,7 @@
   <footer class="bg-soft border-t border-line mt-20">
     <div class="max-w-5xl mx-auto px-4 py-12 grid gap-10 md:grid-cols-4">
       <div class="md:col-span-1">
-        <img src="{% static 'img/logo.jpg' %}" alt="Marketplace" class="h-10 w-auto mix-blend-multiply">
+        <img src="{% static 'img/logo.jpg' %}" alt="Jennifer Website" class="h-10 w-auto mix-blend-multiply">
         <p class="text-sm text-muted mt-3 leading-relaxed">La marketplace des commerçants et artisans du Cameroun. Ouvrez votre boutique, vendez et achetez en toute sécurité.</p>
         <ul class="mt-4 space-y-2 text-sm text-fg">
           <li><a href="https://wa.me/237650808714" target="_blank" rel="noopener" class="flex items-center gap-2 hover:text-brand whitespace-nowrap"><svg class="ico text-emerald-600"><use href="#s-whatsapp"/></svg> +237 6 50 80 87 14</a></li>
@@ -192,7 +212,7 @@
       <div>
         <p class="text-ink font-semibold mb-3">Acheter</p>
         <ul class="space-y-2 text-sm text-muted">
-          <li><a href="{% url 'catalogue:accueil' %}" class="hover:text-brand">Parcourir les boutiques</a></li>
+          <li>{% block lien_boutiques_footer %}<a href="{% url 'catalogue:accueil' %}" class="hover:text-brand">Parcourir les boutiques</a>{% endblock %}</li>
           <li><a href="{% url 'catalogue:connexion' %}" class="hover:text-brand">Connexion</a></li>
           <li><a href="{% url 'catalogue:inscription' %}" class="hover:text-brand">Créer un compte</a></li>
           <li><a href="{% url 'panier:voir' %}" class="hover:text-brand">Mon panier</a></li>
@@ -220,7 +240,7 @@
     </div>
     <div class="border-t border-line">
       <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs text-muted">
-        <p>© {% now "Y" %} Marketplace — Cameroun. Tous droits réservés.</p>
+        <p>© {% now "Y" %} Jennifer Website — Cameroun. Tous droits réservés.</p>
         <p>Développé par <span class="text-fg">Mme DONGMO Medong Jennifer</span>, Ingénieure logicielle.</p>
       </div>
     </div>

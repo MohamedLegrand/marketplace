@@ -1,15 +1,15 @@
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 
+from admin.boutiques.models import Boutique
+from admin.categories.models import Categorie
 from client.comptes.models import AdresseLivraison
 
 from .decorators import client_required
 from .forms import AdresseForm, InscriptionClientForm, ProfilClientForm
-
-BACKEND = "django.contrib.auth.backends.ModelBackend"
 
 
 def inscription(request):
@@ -25,10 +25,9 @@ def inscription(request):
         })
     form = InscriptionClientForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user, backend=BACKEND)
-        messages.success(request, "Compte cree. Bienvenue !")
-        return redirect("comptes_client:tableau_de_bord")
+        form.save()
+        messages.success(request, "Compte créé avec succès. Connectez-vous pour continuer.")
+        return redirect("catalogue:connexion")
     return render(request, "client/comptes/inscription.html", {"form": form})
 
 
@@ -48,7 +47,9 @@ class Connexion(LoginView):
 
 
 class Deconnexion(LogoutView):
-    next_page = reverse_lazy("catalogue:accueil")
+    # Vers la landing page (presentation pure, sans panier) et non le
+    # catalogue : coherent avec le comportement de la deconnexion vendeur.
+    next_page = reverse_lazy("catalogue:landing")
 
 
 class ChangerMotDePasse(PasswordChangeView):
@@ -62,8 +63,44 @@ class ChangerMotDePasse(PasswordChangeView):
 
 @client_required
 def tableau_de_bord(request):
+    from django.db.models import Sum
+
+    from admin.commandes.models import Commande
+
+    commandes = request.user.commandes.all()
+    livrees = commandes.filter(statut=Commande.Statut.LIVREE)
+    en_cours = commandes.exclude(
+        statut__in=(Commande.Statut.LIVREE, Commande.Statut.ANNULEE)
+    )
     return render(request, "client/comptes/tableau_de_bord.html", {
         "adresses": request.user.adresses.all(),
+        "nb_commandes": commandes.count(),
+        "nb_en_cours": en_cours.count(),
+        "total_achete": livrees.aggregate(s=Sum("total"))["s"] or 0,
+        "dernieres_commandes": commandes.select_related("boutique").prefetch_related("lignes")[:5],
+    })
+
+
+@client_required
+def boutiques(request):
+    """Liste des boutiques, accessible depuis le dashboard : on achete en
+    cliquant sur une boutique (catalogue produits, panier, paiement simule)."""
+    q = request.GET.get("q", "").strip()
+    categorie_id = request.GET.get("categorie", "").strip()
+
+    resultats = Boutique.objects.visibles().select_related("categorie")
+    if q:
+        resultats = resultats.filter(
+            Q(nom__icontains=q) | Q(ville__icontains=q) | Q(description__icontains=q)
+        )
+    if categorie_id.isdigit():
+        resultats = resultats.filter(categorie_id=categorie_id)
+
+    return render(request, "client/comptes/boutiques.html", {
+        "boutiques": resultats,
+        "q": q,
+        "categorie_id": categorie_id,
+        "categories": Categorie.objects.filter(type=Categorie.Type.BOUTIQUE, actif=True).order_by("nom"),
     })
 
 

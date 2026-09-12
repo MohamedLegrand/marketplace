@@ -1,11 +1,10 @@
 import re
 
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from admin.abonnements.services import peut_utiliser_ia
-from admin.boutiques.models import Boutique
-from vendeur.comptes.decorators import onboarding_complete_required
+from vendeur.comptes.decorators import acces_boutique_required
 
 from .contexte import prompt_systeme
 from .groq_client import GroqError, get_client
@@ -14,10 +13,6 @@ from .models import Conversation, MessageIA
 # Nombre de messages recents renvoyes a l'IA a chaque question (fenetre de
 # contexte limitee : on garde les echanges les plus recents).
 MAX_HISTORIQUE = 12
-
-
-def _boutique(request, boutique_pk):
-    return get_object_or_404(Boutique, pk=boutique_pk, proprietaire=request.user)
 
 
 def _nettoyer_markdown(texte):
@@ -30,10 +25,10 @@ def _nettoyer_markdown(texte):
     return texte.strip()
 
 
-@onboarding_complete_required
+@acces_boutique_required("statistiques")
 def chat(request, boutique_pk):
-    boutique = _boutique(request, boutique_pk)
-    autorise, motif = peut_utiliser_ia(request.user)
+    boutique = request.boutique
+    autorise, motif = peut_utiliser_ia(boutique.proprietaire)
     if not autorise:
         from admin.abonnements.models import Plan
 

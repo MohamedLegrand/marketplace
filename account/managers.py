@@ -12,12 +12,7 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         # A defaut de username fourni, on derive un identifiant unique depuis l'e-mail.
         if "username" not in extra_fields:
-            base = (email.split("@")[0] or "user")[:140]
-            username, suffixe = base, 1
-            while self.model.objects.filter(username=username).exists():
-                suffixe += 1
-                username = f"{base}{suffixe}"
-            extra_fields["username"] = username
+            extra_fields["username"] = self.model.generer_username(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)

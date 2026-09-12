@@ -1,17 +1,28 @@
-from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from admin.boutiques.models import Boutique
 from admin.commandes.models import Commande
-from admin.paiements.gateway import HRSkillsPayError
 from admin.paiements.models import Paiement
-from admin.paiements.services import initier_paiement_commande, synchroniser_statut
+from admin.paiements.services import simuler_paiement_commande
 from client.comptes.decorators import client_required
-from client.comptes.models import AdresseLivraison
+from client.comptes.forms import AdresseForm
 from client.panier.panier import Panier
 
+from .facture import generer_facture
 from .services import StockInsuffisant, creer_commande
+
+# Operateurs Mobile Money simules : la longueur exacte du code PIN differe
+# selon l'operateur (regle metier demandee), mais sa valeur n'est jamais
+# verifiee (paiement toujours simule comme reussi).
+OPERATEURS = [("orange", "Orange Money"), ("mtn", "MTN MoMo")]
+LONGUEUR_PIN = {"orange": 4, "mtn": 5}
+
+# Valeur du champ "adresse" du formulaire de checkout quand l'acheteur
+# renseigne une nouvelle adresse de livraison au lieu d'en choisir une deja
+# enregistree.
+NOUVELLE_ADRESSE = "nouvelle"
 
 
 @client_required
@@ -32,24 +43,41 @@ def checkout(request):
     adresses = request.user.adresses.all()
     zones = boutique.zones_livraison.filter(actif=True)
     sous_total = panier.total()
+    formulaire_adresse = AdresseForm()
 
     if request.method == "POST":
-        adresse = adresses.filter(pk=request.POST.get("adresse")).first()
+        choix_adresse = request.POST.get("adresse")
         zone = zones.filter(pk=request.POST.get("zone")).first() if zones else None
-        if adresse is None:
-            messages.error(request, "Choisissez une adresse de livraison.")
-        elif zones and zone is None:
-            messages.error(request, "Choisissez une zone de livraison.")
+        adresse = None
+
+        if choix_adresse == NOUVELLE_ADRESSE or not adresses.exists():
+            formulaire_adresse = AdresseForm(request.POST)
+            if formulaire_adresse.is_valid():
+                adresse = formulaire_adresse.save(commit=False)
+                adresse.client = request.user
+                if not adresses.exists():
+                    adresse.par_defaut = True
+                adresse.save()
+            else:
+                messages.error(request, "Corrigez les informations de livraison.")
         else:
-            try:
-                commande = creer_commande(request.user, panier, adresse, zone)
-            except StockInsuffisant as err:
-                messages.error(request, str(err))
-                return redirect("panier:voir")
-            except ValueError:
-                messages.error(request, "Votre panier est vide.")
-                return redirect("panier:voir")
-            return redirect("commandes_client:confirmation", reference=commande.reference)
+            adresse = adresses.filter(pk=choix_adresse).first()
+            if adresse is None:
+                messages.error(request, "Choisissez une adresse de livraison.")
+
+        if adresse is not None:
+            if zones and zone is None:
+                messages.error(request, "Choisissez une zone de livraison.")
+            else:
+                try:
+                    commande = creer_commande(request.user, panier, adresse, zone)
+                except StockInsuffisant as err:
+                    messages.error(request, str(err))
+                    return redirect("panier:voir")
+                except ValueError:
+                    messages.error(request, "Votre panier est vide.")
+                    return redirect("panier:voir")
+                return redirect("commandes_client:confirmation", reference=commande.reference)
 
     return render(request, "client/commandes/checkout.html", {
         "lignes": lignes,
@@ -57,6 +85,8 @@ def checkout(request):
         "adresses": adresses,
         "zones": zones,
         "sous_total": sous_total,
+        "formulaire_adresse": formulaire_adresse,
+        "nouvelle_adresse": NOUVELLE_ADRESSE,
     })
 
 
@@ -77,66 +107,52 @@ def detail(request, reference):
 
 @client_required
 def payer(request, reference):
-    """Formulaire de paiement Mobile Money + initiation via l'agregateur."""
+    """Paiement simule (plus d'agregateur externe) : l'acheteur choisit un
+    operateur Mobile Money et saisit un code PIN (n'importe quelle valeur est
+    acceptee, mais sa longueur doit correspondre a l'operateur : 4 chiffres
+    pour Orange Money, 5 pour MTN MoMo). Le paiement est alors marque
+    reussi, la commande confirmee, une notification envoyee et une facture
+    generee."""
     commande = get_object_or_404(Commande, reference=reference, client=request.user)
     if commande.statut != Commande.Statut.EN_ATTENTE_PAIEMENT:
         return redirect("commandes_client:detail", reference=reference)
 
     if request.method == "POST":
         operateur = request.POST.get("operateur")
-        telephone = (request.POST.get("telephone") or "").strip()
-        if operateur not in dict(settings.OPERATEURS_MOBILE_MONEY) or not telephone:
-            messages.error(request, "Choisissez un operateur et saisissez votre numero.")
+        pin = (request.POST.get("pin") or "").strip()
+        longueur = LONGUEUR_PIN.get(operateur)
+        if longueur is None:
+            messages.error(request, "Choisissez un operateur Mobile Money.")
+        elif not pin.isdigit() or len(pin) != longueur:
+            messages.error(
+                request,
+                f"Le code PIN {dict(OPERATEURS)[operateur]} doit comporter exactement {longueur} chiffres.",
+            )
         else:
-            try:
-                initier_paiement_commande(commande, operateur, telephone)
-            except HRSkillsPayError as err:
-                messages.error(request, f"Echec de l'initiation : {err.message or err.code}")
-            else:
-                messages.success(
-                    request,
-                    "Paiement initie. Validez la demande sur votre telephone, puis cliquez sur Verifier.",
-                )
-                return redirect("commandes_client:paiement_suivi", reference=reference)
+            simuler_paiement_commande(commande, operateur=operateur)
+            messages.success(request, "Paiement effectue. Votre facture est disponible.")
+            return redirect("commandes_client:detail", reference=reference)
 
     return render(request, "client/commandes/payer.html", {
         "commande": commande,
-        "operateurs": settings.OPERATEURS_MOBILE_MONEY,
+        "operateurs": OPERATEURS,
+        "longueurs_pin": LONGUEUR_PIN,
     })
 
 
 @client_required
-def paiement_suivi(request, reference):
-    commande = get_object_or_404(Commande, reference=reference, client=request.user)
-    if commande.statut != Commande.Statut.EN_ATTENTE_PAIEMENT:
-        return redirect("commandes_client:detail", reference=reference)
-    paiement = commande.paiements.order_by("-date_creation").first()
+def facture(request, reference):
+    commande = get_object_or_404(
+        Commande.objects.prefetch_related("lignes"), reference=reference, client=request.user,
+    )
+    paiement = commande.paiements.filter(statut=Paiement.Statut.REUSSI).order_by("-date_confirmation").first()
     if paiement is None:
-        return redirect("commandes_client:payer", reference=reference)
-    return render(request, "client/commandes/paiement_suivi.html", {
-        "commande": commande, "paiement": paiement,
-    })
-
-
-@client_required
-def paiement_verifier(request, reference):
-    commande = get_object_or_404(Commande, reference=reference, client=request.user)
-    paiement = commande.paiements.order_by("-date_creation").first()
-    if request.method == "POST" and paiement:
-        try:
-            synchroniser_statut(paiement)
-        except HRSkillsPayError as err:
-            messages.error(request, f"Verification impossible : {err.message or err.code}")
-            return redirect("commandes_client:paiement_suivi", reference=reference)
-        commande.refresh_from_db()
-        paiement.refresh_from_db()
-        if commande.statut != Commande.Statut.EN_ATTENTE_PAIEMENT:
-            messages.success(request, "Paiement confirme. Votre commande est transmise a la boutique.")
-            return redirect("commandes_client:detail", reference=reference)
-        if paiement.statut == Paiement.Statut.ECHOUE:
-            messages.error(request, "Le paiement a echoue. Vous pouvez reessayer.")
-            return redirect("commandes_client:payer", reference=reference)
-    return redirect("commandes_client:paiement_suivi", reference=reference)
+        messages.error(request, "Aucun paiement confirme pour cette commande.")
+        return redirect("commandes_client:detail", reference=reference)
+    contenu = generer_facture(commande, paiement)
+    reponse = HttpResponse(contenu, content_type="application/pdf")
+    reponse["Content-Disposition"] = f'attachment; filename="facture-{commande.reference}.pdf"'
+    return reponse
 
 
 @client_required

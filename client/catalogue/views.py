@@ -7,6 +7,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from admin.boutiques.models import Boutique
 from admin.categories.models import Categorie
 from admin.produits.models import Produit
+from client.shell import base_shell
 
 
 def _destination_apres_connexion(user):
@@ -14,7 +15,7 @@ def _destination_apres_connexion(user):
     role = getattr(user, "role", None)
     if user.is_staff or role == user.Role.ADMIN:
         return "/admin/"
-    if role == user.Role.VENDEUR:
+    if user.peut_acceder_espace_vendeur:
         return resolve_url("comptes_vendeur:tableau_de_bord")
     return resolve_url("comptes_client:tableau_de_bord")
 
@@ -49,11 +50,22 @@ def apropos(request):
 
 
 def landing(request):
-    """Page d'accueil marketing de la marketplace."""
+    """Page d'accueil marketing de la marketplace.
+
+    La landing page reste une page de presentation : pour un visiteur non
+    connecte, "voir les boutiques" renvoie vers la creation de compte plutot
+    que directement vers le catalogue."""
     boutiques = Boutique.objects.visibles().select_related("categorie")
+    if request.user.is_authenticated and request.user.role == request.user.Role.ACHETEUR:
+        lien_boutiques = resolve_url("comptes_client:boutiques")
+    elif request.user.is_authenticated:
+        lien_boutiques = resolve_url("catalogue:accueil")
+    else:
+        lien_boutiques = resolve_url("catalogue:inscription")
     return render(request, "client/catalogue/landing.html", {
         "boutiques": boutiques[:6],
         "nb_boutiques": boutiques.count(),
+        "lien_boutiques": lien_boutiques,
         "etapes_achat": [
             ("i-search", "Parcourez", "Explorez les boutiques et les produits, filtrez par catégorie."),
             ("i-card", "Commandez", "Ajoutez au panier et payez par Mobile Money en toute sécurité."),
@@ -112,6 +124,7 @@ def boutique(request, boutique_slug):
         "produits": produits,
         "zones": b.zones_livraison.filter(actif=True),
         "avis": b.avis.filter(statut="publie").select_related("auteur")[:20],
+        "base_shell": base_shell(request),
     })
 
 
@@ -127,4 +140,5 @@ def produit(request, boutique_slug, produit_slug):
         "photos": p.photos.all(),
         "variantes": p.variantes.filter(actif=True),
         "avis": p.avis.filter(statut="publie").select_related("auteur")[:30],
+        "base_shell": base_shell(request),
     })
